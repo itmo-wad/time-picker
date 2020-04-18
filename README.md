@@ -19,3 +19,6 @@ User could find a personal page for service that they need and just a book free 
 - Self-employment people (for example manicurists, barbers, turors, etc.) just write their free time on board, then give a link to customers. Customers book time without communication with barber.
 
 - Custumers could find the closest way to have a service.
+
+Application workflow is on the picture below:
+![Workflow](https://raw.githubusercontent.com/itmo-wad/time-picker/master/workflow.png)
