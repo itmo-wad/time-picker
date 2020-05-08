@@ -22,3 +22,30 @@ User could find a personal page for service that they need and just a book free 
 
 Application workflow is on the picture below:
 ![Workflow](https://raw.githubusercontent.com/itmo-wad/time-picker/master/workflow.png)
+
+<h2>ToDo list</h2>
+
+- Discuss teammates roles
+- Create databases with two tables 
+  * table workers:
+    * nickname
+    * name
+    * surname
+    * offered service
+    * about informations
+    * location
+    * free work hours
+  * table users
+    * nickname
+    * name
+    * surname
+    * reserved time
+- Create Backend part:
+  * registration func 
+  * finding services by name/location
+  * reserve time func
+  * confirm time and notify func
+- Create Frontend part for each backend functions
+- Deploy
+
+
