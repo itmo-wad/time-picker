@@ -1,0 +1,43 @@
+<html>
+  <head>
+  <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+  <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"type="text/javascript" charset="utf-8"></script>
+  <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body style='margin: 0'>
+  <div style="width: 50vw; height: 50vh" id="mapContainer"></div>
+  <button onclick="location.href = '/'">Cancel creation and back to main page</button>
+  <form method = "POST" action="/set_address">
+    <p>Input your address<p>
+		<input class="input" type="text" name="address" placeholder="Санкт-петербург, Невский проспект, дом 8"  required><br>
+    <button type="submit" class="btn">Check address</button>
+  </form>
+
+  <button onclick="location.href = '/save_coordinate?lt={{latitude}}&lg={{longitude}}'">Ok, next!</button>
+
+  <script>
+    // Initialize the platform object:
+    var platform = new H.service.Platform({
+    'apikey': '{{apikey}}'
+    });
+
+	const lng = {{longitude}};
+	const lat = {{latitude}};
+
+// Obtain the default map types from the platform object
+	var defaultLayers = platform.createDefaultLayers();
+
+// Instantiate (and display) a map object:
+var map = new H.Map(
+    document.getElementById('mapContainer'),
+    defaultLayers.vector.normal.map,
+    {
+      zoom: 10,
+      center: { lat: lat, lng: lng }
+    });
+
+	const marker = new H.map.Marker({lat: lat, lng: lng});
+	map.addObject(marker);
+  </script>
+  </body>
+</html>

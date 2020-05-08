@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8" />
+  <title>HTML5</title>
+
+ </head>
+ <body>
+
+
+  <h1>Hello,  {{name}}</h1>
+
+  {% if image %}
+  <p><img src="data:image/png;base64, {{image}}" style="width: 100px;"/></p>
+  {% else %}
+  <p>You haven't upload image</p>
+  {% endif %}
+
+  <p>Your phone: {{phone_num}}</p>
+
+  <button onclick="location.href = '/settings'">Settings</button>
+  <button onclick="location.href = '/create_service'">Create service</button>
+
+  <form method = "POST" action="/search_service">
+    <input class="input" type="text" name="search_for" placeholder="Ex: 'Barber'"  required>
+    <button type="submit" class="btn">Search!</button>
+  </form>
+
+  <button onclick="location.href = '/logout'">logout</button>
+
+
+
+
+
+
+
+
+ </body>
+</html>

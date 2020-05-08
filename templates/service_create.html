@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Create service</title>
+	<style>
+
+	</style>
+</head>
+
+<body>
+  <button onclick="location.href = '/'">Back to main page</button>
+
+  <h1>Create service</h1>
+  <div>
+    {% for message in get_flashed_messages() %}
+      <h4>{{ message }}</h4>
+    {% endfor %}
+  </div>
+  <form method = "POST" action="/create_service">
+    <p>Input name of your service<p>
+		<input class="input" type="text" name="name_service" placeholder="Barber"  required><br>
+    <p>Input description about yourself<p>
+		<input class="input" type="text" name="additional_information" placeholder="Adit. info"  required>
+    <button type="submit" class="btn">Next</button>
+  </form>
+
+
+
+
+</body >
+</html>

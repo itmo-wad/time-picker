@@ -1,0 +1,147 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" media="screen"
+     href="http://tarruda.github.com/bootstrap-datetimepicker/assets/css/bootstrap-datetimepicker.min.css">
+  </head>
+  <body>
+
+    <script type="text/javascript"
+     src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js">
+    </script>
+    <script type="text/javascript"
+     src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js">
+    </script>
+    <script type="text/javascript"
+     src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-datetimepicker.min.js">
+    </script>
+    <script type="text/javascript"
+     src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-datetimepicker.pt-BR.js">
+    </script>
+
+    <div class="well">
+      <table cellspacing="0">
+        <tr>
+          <th>
+            <p>Select date</p>
+            <div id="datetimepicker4" class="input-append">
+              <input class = "day" id = "date" data-format="yyyy-MM-dd" type="text"></input>
+              <span class="add-on">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+
+                </i>
+              </span>
+
+
+            </div>
+          </th>
+          <th>
+            <p>Select range of time (hh-hh)</p>
+
+            <div id="datetimepicker3" class="input-append">
+              <input id = "time" data-format="hh:mm" type="text"></input>
+              <span class="add-on">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+                </i>
+              </span>
+            </div>
+
+          </th>
+
+          <th>
+
+            <button id = "addbut">Add working date/time</button>
+
+          </th>
+
+          <th>
+            <p>doesn't render next template??</p>
+            <button id = "finish">All done, next!</button>
+
+          </th>
+          <th>
+            <p>just for next page</p>
+            <button onclick="location.href = '/service'">next!</button>
+
+          </th>
+
+        </td>
+      </table>
+
+</div>
+
+<script type="text/javascript">
+  $(function() {
+    $('#datetimepicker4').datetimepicker({
+      pickTime: false
+    });
+  });
+</script>
+
+
+
+
+
+  <div class = "selected_dates">
+
+    <div class = "date">
+      <table cellspacing="1">
+        <td>
+          <th>21.04.20</th><th>10-18</th><th><button id = "delbut">delete</button></th>
+        </td>
+    </div>
+
+
+  </div>
+
+
+
+
+  </body>
+
+
+  <script type="text/javascript">
+
+    delbut.onclick = function() {
+
+      var parent = $(this).closest('table');
+      parent.next().remove()
+      parent.remove()
+      //delete function doesn't work ||
+
+    }
+
+    addbut.onclick = function(){
+
+        var date = document.getElementById("date").value
+        var time = document.getElementById("time").value
+
+        if (date) {
+          $( 'div.selected_dates' ).append('<div class = "date"><table cellspacing="1"><td><th>'+date+'</th><th>'+time+'</th><th><button id = "delbut">delete</button></th></td></div></div>')
+        }
+
+    }
+
+    finish.onclick = function(){
+
+      var check = document.getElementsByClassName("well");
+      console.log(check);
+      var working_dates = ["hi"];
+      for (var i = 0; i < check.length; i++) {
+          working_dates.push(check[i].innerText);
+
+      }
+      console.log(working_dates);
+      let response = fetch('http://' + document.domain + ':' + location.port+'/date_select',{
+        method: 'POST',
+        headers: {
+                  'Content-Type': 'application/json;charset=utf-8'
+                  },
+        body: JSON.stringify(working_dates)
+      });
+    }
+
+
+  </script>
+<html>

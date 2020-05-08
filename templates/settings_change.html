@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login</title>
+	<style>
+
+	</style>
+</head>
+
+<body>
+  <button onclick="location.href = '/'">Back to main page</button>
+  
+  <h1>Change personal information</h1>
+  <div>
+    {% for message in get_flashed_messages() %}
+      <h4>{{ message }}</h4>
+    {% endfor %}
+  </div>
+  <form method = "POST" action="/settings_change">
+		<input class="input" type="text" name="name" placeholder={{name}}  required>
+		<input class="input" type="text" name="surname" placeholder={{surname}}  required>
+		<input class="input" type="text" name="phone_number" placeholder={{phone_num}}  required>
+    <button type="submit" class="btn">Change</button>
+  </form>
+
+</body >
+</html>
