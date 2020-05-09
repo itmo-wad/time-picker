@@ -1,20 +1,12 @@
-from flask import Flask, send_from_directory, request, flash, redirect, session, url_for
-from flask import render_template
-from flask_pymongo import PyMongo
+""" Views file """
+
 import os
-import mongodb_query
+import json
 import base64
 import requests
-import json
-
-
-
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY")
-
-app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
-mongo = PyMongo(app)
-
+import mongodb_query
+from app import app, mongo
+from flask import Flask, send_from_directory, request, flash, redirect, render_template, session, url_for
 
 
 maps_URL = "https://geocode.search.hereapi.com/v1/geocode"
@@ -22,6 +14,7 @@ maps_api_key = os.environ.get("HERE_API_KEY")
 PARAMS = {'apikey':maps_api_key,'q':"Невский проспект"}#default address
 latitude = 59.9138
 longitude = 30.3483
+
 
 #redirects to mainpage if logged in
 #else - login
