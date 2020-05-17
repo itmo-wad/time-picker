@@ -7,13 +7,13 @@
   <body style='margin: 0'>
   <div style="width: 50vw; height: 50vh" id="mapContainer"></div>
   <button onclick="location.href = '/'">Cancel creation and back to main page</button>
-  <form method = "POST" action="/set_address">
+  <form method = "POST" action="/set_address?id={{id}}">
     <p>Input your address<p>
 		<input class="input" type="text" name="address" placeholder="Санкт-петербург, Невский проспект, дом 8"  required><br>
     <button type="submit" class="btn">Check address</button>
   </form>
 
-  <button onclick="location.href = '/save_coordinate?lt={{latitude}}&lg={{longitude}}'">Ok, next!</button>
+  <button onclick="location.href = '/save_coordinate?id={{id}}&lt={{latitude}}&lg={{longitude}}'">Ok, next!</button>
 
   <script>
     // Initialize the platform object:
@@ -23,6 +23,7 @@
 
 	const lng = {{longitude}};
 	const lat = {{latitude}};
+  const id = {{id}};
 
 // Obtain the default map types from the platform object
 	var defaultLayers = platform.createDefaultLayers();

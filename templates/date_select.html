@@ -50,6 +50,19 @@
           </th>
 
           <th>
+            <p>Select how much time your work take</p>
+
+            <div id="datetimepicker3" class="input-append">
+              <input id = "range_time" data-format="hh:mm" type="text"></input>
+              <span class="add-on">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+                </i>
+              </span>
+            </div>
+
+          </th>
+
+          <th>
 
             <button id = "addbut">Add working date/time</button>
 
@@ -61,8 +74,8 @@
 
           </th>
           <th>
-            <p>just for next page</p>
-            <button onclick="location.href = '/service'">next!</button>
+            <p>use it for next page | problem with fetch and redirect in flask</p>
+            <button onclick="location.href = '/service?id={{id}}'">next!</button>
 
           </th>
 
@@ -88,7 +101,7 @@
     <div class = "date">
       <table cellspacing="1">
         <td>
-          <th>21.04.20</th><th>10-18</th><th><button id = "delbut">delete</button></th>
+          <th>21.04.20</th><th>10-18</th><th><button id = "delbut">delete</button></th>//Todo do it like example text
         </td>
     </div>
 
@@ -102,6 +115,9 @@
 
 
   <script type="text/javascript">
+
+
+    const id = {{id}};
 
     delbut.onclick = function() {
 
@@ -117,23 +133,26 @@
         var date = document.getElementById("date").value
         var time = document.getElementById("time").value
 
-        if (date) {
-          $( 'div.selected_dates' ).append('<div class = "date"><table cellspacing="1"><td><th>'+date+'</th><th>'+time+'</th><th><button id = "delbut">delete</button></th></td></div></div>')
-        }
+        if (date && time) {
+          $( 'div.selected_dates' ).append('<div class = "date_selected"><table cellspacing="1"><td><th>'+date+'</th><th>'+time+'</th><th><button id = "delbut">delete</button></th></td></div></div>')
+        }//Todo  rewrite delete button
+
 
     }
 
     finish.onclick = function(){
+      //Todo: no check for adding date/time and range_time
 
-      var check = document.getElementsByClassName("well");
+      var check = document.getElementsByClassName("date_selected");
+      var range_time = document.getElementById("range_time").value//Todo: check for int
       console.log(check);
-      var working_dates = ["hi"];
+      var working_dates = [range_time];
       for (var i = 0; i < check.length; i++) {
           working_dates.push(check[i].innerText);
-
       }
       console.log(working_dates);
-      let response = fetch('http://' + document.domain + ':' + location.port+'/date_select',{
+      //Todo probably here is problem with using fetch because of it brokes redirect from flask
+      let response = fetch('http://' + document.domain + ':' + location.port+'/date_select?id={{id}}',{
         method: 'POST',
         headers: {
                   'Content-Type': 'application/json;charset=utf-8'
@@ -144,4 +163,4 @@
 
 
   </script>
-<html>
+</html>

@@ -9,8 +9,10 @@ from app import app, mongo
 from flask import Flask, send_from_directory, request, flash, redirect, render_template, session, url_for
 
 
+
+
 maps_URL = "https://geocode.search.hereapi.com/v1/geocode"
-maps_api_key = os.environ.get("HERE_API_KEY")
+maps_api_key = app.config["MAPS_API"]
 PARAMS = {'apikey':maps_api_key,'q':"Невский проспект"}#default address
 latitude = 59.9138
 longitude = 30.3483
@@ -147,7 +149,6 @@ def settings_change_info():
 				flash("something goes wrong, try again")
 				return redirect(url_for("settings_change_info"))
 
-
 #creating new service
 #first page for add information about service
 @app.route('/create_service', methods = ['GET', 'POST'])
@@ -163,21 +164,25 @@ def create_service():
 		if 'username' in session:
 			print(request.form['name_service'])
 			print(request.form['additional_information'])
+			id = mongodb_query.create_service(session['username'], request.form['name_service'], request.form['additional_information'])
 			#save information to DB
 			#next page | map select
-			return render_template('map.html',apikey=maps_api_key,latitude=latitude,longitude=longitude)#map.html is my HTML file name
+			#sending ID throught the each page of service registration
+			return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))
+			#return render_template('map.html',apikey=maps_api_key, id=id, latitude=latitude,longitude=longitude)#map.html is my HTML file name
 
 
 #creating new service
 #second page for add coordinates about service
 @app.route('/set_address', methods = ['GET', 'POST'])
-def set_address(lt = 59.9138, lg = 30.3483):
+def set_address(id=0, lt = 59.9138, lg = 30.3483):
 	#showing updated map
 	if request.method == "GET":
 		if 'username' in session:
+			id = request.args.get('id')
 			lat = request.args.get('lt')
 			long = request.args.get('lg')
-			return render_template('map.html',apikey=maps_api_key,latitude=lat,longitude=long)#map.html is my HTML file name
+			return render_template('map.html',apikey=maps_api_key, id=id, latitude=lat,longitude=long)#map.html is my HTML file name
 
 		else:
 			return render_template('login_page.html')
@@ -185,6 +190,7 @@ def set_address(lt = 59.9138, lg = 30.3483):
 	#set new address
 	if request.method == "POST":
 		if 'username' in session:
+			id = request.args.get('id')
 			PARAMS['q'] = request.form['address']
 			# sending get request and saving the response as response object
 			r = requests.get(url = maps_URL, params = PARAMS)
@@ -193,44 +199,63 @@ def set_address(lt = 59.9138, lg = 30.3483):
 			longitude = data['items'][0]['position']['lng']
 			print(latitude)
 			print(longitude)
-			return redirect(url_for('set_address',lt=latitude,lg=longitude))#map.html is my HTML file name
+			return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))#map.html is my HTML file name
 
 
 
 #creating new service
 #just saving coordinates and redirects to date_select [redirect - NOT WORKING]
 @app.route('/save_coordinate', methods = ['GET', 'POST'])
-def save_coordinate(lt=0, lg=0):
+def save_coordinate(id = 0, lt=0, lg=0):
 	if request.method == "GET":
 		if 'username' in session:
 			#save coordinates to DB
+			id = request.args.get('id')
 			lat = request.args.get('lt')
 			long = request.args.get('lg')
 			print(session['username'],lat, long)
-			return redirect(url_for('date_select'))
+			if mongodb_query.service_coordinates(id, session['username'], lat, long):
+				return redirect(url_for('date_select', id=id))
+			else:
+				return redirect(url_for('create_service'))
 
 
 
 #creating new service
 #third page for add free time for advice service
 @app.route('/date_select', methods = ['GET', 'POST'])
-def date_select():
+def date_select(id = 0):
 	if request.method == "GET":
 		if 'username' in session:
-			return render_template('date_select.html')
+			id = request.args.get('id')
+			return render_template('date_select.html', id=id)
 		else:
 			return render_template('login_page.html')
 	if request.method == "POST":
 		if 'username' in session:
-			req = request.get_json()
-			print(req)
+			id = request.args.get('id')
+			get_schedular = request.get_json()
+			print(get_schedular)
 			#ALSO SHOULD ASK about how much work takes time to split working hours
 			#save date time to DB
 			#check if everything ok then return created page
+			set_schedular = dict() # prepare to send to mongo {date: time]}
+			range_time = get_schedular.pop(0)
+			for selected in get_schedular:
+				data = selected.split("\t")
+				data.pop(0)#deleting empty('') item
+				time = (int(data[1].split("-")[1])-int(data[1].split('-')[0]))
+				set_schedular[data[0]] = data[1]
 
+			print(set_schedular)
+			if mongodb_query.service_schedule(id, session['username'], set_schedular):
+				print("SHOULD REDICRECT!!!!111")
+				return redirect(url_for('service',id=id))
+			else:
+				return redirect(url_for('create_service'))
 			#all done, save and set a number of service, call created page
 			#get created id of service by session 'username'
-			return redirect(url_for('service',id=1))
+
 
 
 
@@ -242,30 +267,38 @@ def service(id = 1):
 
 	if request.method == "GET":
 		if 'username' in session:
+			id = request.args.get('id')
 			#get information about service from DB by id
-			service_name = "Barber"
-			service_information = "Do the best, very fast, low cost."
-			master = "Ivanov Ivan"
-			free_hours_on_selected_date = ["10-12"]
-			print("before rendering")
-			#return redirect('login_page.html')
-			return render_template('service.html',s_name=service_name, s_info=service_information, master = master, date = "08.05.20",hours=map(json.dumps, free_hours_on_selected_date))
+			get_info = mongodb_query.service_info(id)
+			if get_info:
+				service_name = get_info["service_name"]
+				service_information = get_info["addit_info"]
+				master = get_info["username"]
+				free_hours_on_selected_date = get_info["schedule"]
+				coordinates = [get_info["lt"], get_info["lg"]]
+				print("before rendering")
+				#return redirect('login_page.html')
+				return render_template('service.html',s_name=service_name, s_info=service_information, master = master, date = "08.05.20",hours=map(json.dumps, free_hours_on_selected_date))
+			else:
+				#there is not such service
+				return render_template("mainpage")
 
-	#used to change the date of time select
+	#used to select the date and should return time Todo
 	if request.method == "POST":
 		if 'username' in session:
-			service_name = "Barber"
-			service_information = "Do the best, very fast, low cost."
-			master = "Ivanov Ivan"
-
-			day = request.get_json()
-			#selected day to show work hours
-			print(day)
-			#ask db about work hours on date
-			free_hours_on_selected_date = ["10-11","11-12", "12-13"]
-
-			return render_template('service.html',s_name=service_name, s_info=service_information, master = master, date = day, hours=map(json.dumps, free_hours_on_selected_date))
-
+			get_info = mongodb_query.service_info(id)
+			if get_info:
+				service_name = get_info["service_name"]
+				service_information = get_info["addit_info"]
+				master = get_info["username"]
+				free_hours_on_selected_date = get_info["schedule"]
+				coordinates = [get_info["lt"], get_info["lg"]]
+				print("before rendering")
+				#return redirect('login_page.html')
+				return render_template('service.html',s_name=service_name, s_info=service_information, master = master, date = "08.05.20",hours=map(json.dumps, free_hours_on_selected_date))
+			else:
+				#there is not such service
+				return render_template("mainpage")
 
 
 #uploading a picture from settings

@@ -1,3 +1,6 @@
+#That file was used for testing maps page
+#Not it has no dependencies 
+
 import requests
 from flask import Flask,render_template
 

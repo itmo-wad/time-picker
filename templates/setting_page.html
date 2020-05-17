@@ -3,13 +3,50 @@
  <head>
   <meta charset="utf-8" />
   <title>HTML5</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+  <style type="text/css">
+    body {
+
+      margin: 10%;
+    }
+
+
+
+    </style>
+
 
  </head>
+
+
+
+
  <body>
 
+   <nav class="navbar navbar-expand-lg navbar-light bg-light">
+     <a class="navbar-brand" href="#">TimePicker</a>
+     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+       <span class="navbar-toggler-icon"></span>
+     </button>
+     <div class="collapse navbar-collapse" id="navbarNav">
+       <ul class="navbar-nav">
+         <li class="nav-item ">
+           <a class="nav-link" href="/mainpage">Search! </a>
+         </li>
+         <li class="nav-item">
+           <a class="nav-link" href="/create_service">Create own service</a>
+         </li>
+         <li class="nav-item active">
+           <a class="nav-link" href="/settings">Your account <span class="sr-only">(current)</span></a>
+         </li>
+         <li class="nav-item">
+           <a class="nav-link" href="/logout">Logout</a>
+         </li>
+       </ul>
+     </div>
+   </nav>
 
-<button onclick="location.href = '/'">Back to main page</button>
-<h1>Personal page:</h1>
+
 
 <p>Your avatar:</p>
 
@@ -19,19 +56,47 @@
 <p>You haven't upload image</p>
 {% endif %}
 
-  <h3>Upload new Avatar</h3>
-    <form method=post action = "/up" enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
+<div class="alert alert-secondary" role="alert" align="center">
+  Welcome to your page, {{surname}} {{name}}!
+</div>
 
-<h3>Your information:</h3>
-<p>Your login: {{login}}</p>
-<p>Your name: {{name}}</p>
-<p>Your surname: {{surname}}</p>
-<p>Your phone number: {{phone_num}}</p>
-<button onclick="location.href = '/settings_change'">Change information</button>
-<button onclick="location.href = '/changepass'">Change password</button>
+<div class="alert alert-secondary" role="alert" align="center">
+  Your login: {{login}}
+</div>
+
+<div class="alert alert-secondary" role="alert" align="center">
+  Contact number: {{phone_num}}
+</div>
+
+
+
+
+
+
+
+
+<div>
+  {% for message in get_flashed_messages() %}
+    <h4>{{ message }}</h4>
+  {% endfor %}
+</div>
+<form method=post action = "/up" enctype=multipart/form-data>
+  <div class="input-group mb-3">
+    <div class="custom-file">
+      <input type="file" class="custom-file-input" id="inputGroupFile02" name=file>
+      <label class="custom-file-label" for="inputGroupFile02">Upload new image</label>
+    </div>
+    <div class="input-group-append">
+
+      <input class="input-group-text" type=submit value=Upload>
+    </div>
+  </div>
+</form>
+
+
+<button type="button" class="btn btn-outline-secondary btn-block" onclick="window.location.href='/settings_change'">Change information</button>
+<button type="button" class="btn btn-outline-secondary btn-block" onclick="window.location.href='/changepass'">Change password</button>
+<button type="button" class="btn btn-outline-secondary btn-block" onclick="window.location.href='/mainpage'">Back</button>
 
 
 
@@ -44,11 +109,5 @@
         <li>{{ user.username }} : {{ user.password }}</li>
     {% endfor %}
 </ul>
-
-
-
-
-
-
 </body>
 </html>

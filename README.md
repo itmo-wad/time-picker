@@ -26,7 +26,7 @@ Application workflow is on the picture below:
 <h2>ToDo list</h2>
 
 - Discuss teammates roles
-- Create databases with two tables 
+- Create databases with two tables
   * table workers:
     * nickname
     * name
@@ -41,7 +41,7 @@ Application workflow is on the picture below:
     * surname
     * reserved time
 - Create Backend part:
-  * registration func 
+  * registration func
   * finding services by name/location
   * reserve time func
   * confirm time and notify func
@@ -49,3 +49,8 @@ Application workflow is on the picture below:
 - Deploy
 
 
+**Quick start:**
+
+- set up "config.py"
+
+- execute "run.py"
