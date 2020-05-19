@@ -27,7 +27,8 @@ def login():
 			session['username'] = request.form['username']
 			return redirect('mainpage')
 		else:
-			return render_template('error_login.html')
+			flash("Wrong login or password!")
+			return render_template('login_page.html')
 	elif request.method == "GET":
 		if 'username' in session:
 			return redirect(url_for("mainpage"))
@@ -191,7 +192,8 @@ def set_address(id=0, lt = 59.9138, lg = 30.3483):
 	if request.method == "POST":
 		if 'username' in session:
 			id = request.args.get('id')
-			PARAMS['q'] = request.form['address']
+			address = request.form['city']+' '+request.form['street']+' '+request.form['building_number']
+			PARAMS['q'] = address
 			# sending get request and saving the response as response object
 			r = requests.get(url = maps_URL, params = PARAMS)
 			data = r.json()

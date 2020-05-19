@@ -32,7 +32,8 @@ def login():
 			session['username'] = request.form['username']
 			return redirect('mainpage')
 		else:
-			return render_template('error_login.html')
+			flash("Wrong login or password!")
+			return render_template('login_page.html')
 	elif request.method == "GET":
 		if 'username' in session:
 			return redirect(url_for("mainpage"))

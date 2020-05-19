@@ -1,19 +1,84 @@
 <html>
   <head>
-  <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-  <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"type="text/javascript" charset="utf-8"></script>
-  <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"type="text/javascript" charset="utf-8"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"type="text/javascript" charset="utf-8"></script>
   </head>
-  <body style='margin: 0'>
-  <div style="width: 50vw; height: 50vh" id="mapContainer"></div>
-  <button onclick="location.href = '/'">Cancel creation and back to main page</button>
-  <form method = "POST" action="/set_address?id={{id}}">
-    <p>Input your address<p>
-		<input class="input" type="text" name="address" placeholder="Санкт-петербург, Невский проспект, дом 8"  required><br>
-    <button type="submit" class="btn">Check address</button>
-  </form>
+  <style type="text/css">
+    body {
 
-  <button onclick="location.href = '/save_coordinate?id={{id}}&lt={{latitude}}&lg={{longitude}}'">Ok, next!</button>
+      margin: 10%;
+    }
+    .mapContainer {
+      width: 50vw;
+      height: 50vh;
+    }
+
+
+    </style>
+    <body>
+
+     <nav class="navbar navbar-expand-lg navbar-light bg-light">
+       <a class="navbar-brand" href="#">TimePicker</a>
+       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+         <span class="navbar-toggler-icon"></span>
+       </button>
+       <div class="collapse navbar-collapse" id="navbarNav">
+         <ul class="navbar-nav">
+           <li class="nav-item">
+             <a class="nav-link" href="/mainpage">Search! </a>
+           </li>
+           <li class="nav-item active">
+             <a class="nav-link" href="/create_service">Create own service<span class="sr-only">(current)</span></a>
+           </li>
+           <li class="nav-item">
+             <a class="nav-link" href="/settings">Your account</a>
+           </li>
+           <li class="nav-item">
+             <a class="nav-link" href="/logout">Logout</a>
+           </li>
+         </ul>
+       </div>
+     </nav>
+
+     <div class="alert alert-secondary" role="alert" align="center">
+       Step 2/3: Set up address, where you'll provide service.
+     </div>
+
+  <div id="mapContainer"></div>
+
+  <div class="fill_address">
+    <form method = "POST" action="/set_address?id={{id}}">
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="">City</span>
+        </div>
+        <input class="form-control" type="text" name="city" placeholder="Hint: Saint-Petersburg"  required>
+      </div>
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Street</span>
+        </div>
+        <input class="form-control" type="text" name="street" placeholder="Hint: Nevskiy prospect"  required></input>
+      </div>
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Building number</span>
+        </div>
+        <input class="form-control" type="text" name="building_number" placeholder="Hint: 16"  required></input>
+      </div>
+      <button type="submit" class="form-control">Show address on map.</button>
+    </form>
+  </div>
+
+  <div class = "check">
+    <button class="form-control" onclick="location.href = '/save_coordinate?id={{id}}&lt={{latitude}}&lg={{longitude}}'">Address is recognized excellent. Next step!</button>
+    <button class="form-control" onclick="location.href = '/set_address?id={{id}}'">Map is not shown. Type address again.</button>
+  <div>
+//todo add js: next step but and type again should be shown after check button and inputs hidden
+
+
 
   <script>
     // Initialize the platform object:

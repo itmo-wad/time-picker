@@ -1,74 +1,69 @@
 <html>
 <head>
-  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" media="screen"
-   href="http://tarruda.github.com/bootstrap-datetimepicker/assets/css/bootstrap-datetimepicker.min.css">
-</head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-<body>
+  <style type="text/css">
+    body {
 
-
-
-
-  <button onclick="location.href = '/'">Back to main page</button>
+      margin: 10%;
+    }
 
 
-  <h1>Service: {{s_name}}</h1>
-  <h2>Additional information</h2>
-  <p>{{s_info}}</p>
-  <h2>Master:</h2>
-  <p>{{master}}</p>
+    </style>
+
+
+ </head>
 
 
 
 
+ <body>
+
+   <nav class="navbar navbar-expand-lg navbar-light bg-light">
+     <a class="navbar-brand" href="#">TimePicker</a>
+     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+       <span class="navbar-toggler-icon"></span>
+     </button>
+     <div class="collapse navbar-collapse" id="navbarNav">
+       <ul class="navbar-nav">
+         <li class="nav-item active">
+           <a class="nav-link" href="/mainpage">Search! <span class="sr-only">(current)</span></a>
+         </li>
+         <li class="nav-item">
+           <a class="nav-link" href="/create_service">Create own service</a>
+         </li>
+         <li class="nav-item">
+           <a class="nav-link" href="/settings">Your account</a>
+         </li>
+         <li class="nav-item">
+           <a class="nav-link" href="/logout">Logout</a>
+         </li>
+       </ul>
+     </div>
+   </nav>
+
+   <div class="alert alert-secondary" role="alert" align="center">
+    {% if s_name %}
+      <p>{{s_name}}</p>
+    {% else %}
+      <p>Oops.. There is no name of service</p>
+    {% endif %}
+   </div>
+
+   <div class="alert alert-secondary" role="alert" align="center">
+    {% if s_info %}
+      <p>{{s_info}}</p>
+    {% else %}
+      <p>Oops.. There is no name of service</p>
+    {% endif %}
+   </div>
+
+  <button type="button" class="btn btn-outline-secondary btn-block" onclick="window.location.href='/master_address?login={{master}}'">Show map</button>
+  <button type="button" class="btn btn-outline-secondary btn-block" onclick="window.location.href='/chat_with?login={{master}}'">Contact with master</button>
+  <button type="button" class="btn btn-outline-secondary btn-block" onclick="window.location.href='/book_time?login={{master}}'">Reserve your time</button>
 
 
 
-
-  <script type="text/javascript"
-   src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js">
-  </script>
-  <script type="text/javascript"
-   src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js">
-  </script>
-  <script type="text/javascript"
-   src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-datetimepicker.min.js">
-  </script>
-  <script type="text/javascript"
-   src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-datetimepicker.pt-BR.js">
-  </script>
-
-  <div class="well">
-    <table cellspacing="0">
-      <tr>
-        <th>
-          <p>Select date</p>
-          <div id="datetimepicker4" class="input-append">
-            <input id = "date" data-format="yyyy-MM-dd" type="text"></input>
-            <span class="add-on">
-              <i data-time-icon="icon-time" data-date-icon="icon-calendar">
-
-              </i>
-            </span>
-
-
-          </div>
-        </th>
-        <th>
-          <button id = "day_select">select</button>
-        </th>
-      </tr>
-    </table>
-  </div>
-
-  <script type="text/javascript">
-    $(function() {
-      $('#datetimepicker4').datetimepicker({
-        pickTime: false
-      });
-    });
-  </script>
 
 
 
@@ -96,6 +91,10 @@
 
 
   </body>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
   <script type="text/javascript">
 
 

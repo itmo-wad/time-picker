@@ -77,7 +77,7 @@ def create_service(login, service_name, addit_info):
 		return id
 	else:
 		#id = views.mongo.db.eval("getNextSequenceValue('productid')") think it s not working with mlab
-		id = 7 #vremenniy kostil
+		id = 8 #vremenniy kostil
 		views.mongo.db.services.insert({"_id":id, "username":login.lower(), "service_name": service_name, "addit_info": addit_info})
 		return id
 
