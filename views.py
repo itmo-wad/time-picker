@@ -6,7 +6,7 @@ import base64
 import requests
 import mongodb_query
 from app import app, mongo
-from flask import Flask, send_from_directory, request, flash, redirect, render_template, session, url_for
+from flask import Flask, send_from_directory, request, flash, redirect, render_template, session, url_for, jsonify
 
 
 
@@ -163,14 +163,20 @@ def create_service():
 	#saves information and turns to next step
 	if request.method == "POST":
 		if 'username' in session:
-			print(request.form['name_service'])
-			print(request.form['additional_information'])
-			id = mongodb_query.create_service(session['username'], request.form['name_service'], request.form['additional_information'])
+			#print(request.form['name_service'])
+			#print(request.form['additional_information'])
+			print("HERE I AM")
+			name_service = request.form['service_name']
+			additional_information = request.form['service_descr']
+			service_image = request.files['service_image']
+			#print(base64.b64encode(service_image.read()).decode())
+			id = mongodb_query.create_service(session['username'], name_service, additional_information, service_image)
 			#save information to DB
 			#next page | map select
 			#sending ID throught the each page of service registration
 			return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))
 			#return render_template('map.html',apikey=maps_api_key, id=id, latitude=latitude,longitude=longitude)#map.html is my HTML file name
+
 
 
 #creating new service
@@ -301,6 +307,34 @@ def service(id = 1):
 			else:
 				#there is not such service
 				return render_template("mainpage")
+
+
+#Finding list of services
+@app.route('/find', methods = ['POST'])
+def find_service(page = 1):
+
+	#used to select the date and should return time Todo
+	if request.method == "POST":
+		if 'username' in session:
+			find_by = request.data.decode("utf-8")
+			#TODO: check for int
+			page = int(request.args.get('page'))
+			print(type(page))
+			print(type(find_by))
+			print(page)
+			print(find_by)
+			count, result = mongodb_query.service_find(find_by, page)
+			print("HERE IS COUNT "+str(count))
+			if count:
+				print(result)
+				print("HERE")
+
+				return jsonify({'count':count, 'services':result})
+				#return render_template('main_info.html',page=page, count=count, services=json.dumps(result))
+			else:
+				#there is no such service
+				return render_template("mainpage")
+
 
 
 #uploading a picture from settings

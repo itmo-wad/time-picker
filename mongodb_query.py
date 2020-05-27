@@ -19,7 +19,9 @@ I don't know why, but when DB is not in use some time, then function delete auto
 Need to create again
 function getNextSequenceValue(sequenceName){ var sequenceDocument = db.counters.findAndModify({ query:{_id: sequenceName }, update: {$inc:{sequence_value:1}}, new:true }); return sequenceDocument.sequence_value; }
 """
+import re
 import views
+import base64
 
 
 
@@ -69,16 +71,18 @@ def change_info(username, name, surname, phone_num):
 
 
 #service creation
-def create_service(login, service_name, addit_info):
+def create_service(login, service_name, addit_info, image):
 	service_exsist = list(views.mongo.db.services.find({"username":login.lower(), "service_name": service_name}).limit(1))
 	if service_exsist:
 		print("#TODO service already registered with this login and service name")
 		id = list(views.mongo.db.services.find({"username":login.lower(), "service_name": service_name}).limit(1))[0]
 		return id
 	else:
-		#id = views.mongo.db.eval("getNextSequenceValue('productid')") think it s not working with mlab
-		id = 8 #vremenniy kostil
-		views.mongo.db.services.insert({"_id":id, "username":login.lower(), "service_name": service_name, "addit_info": addit_info})
+		#next_id = views.mongo.db.eval("getNextSequenceValue('productid')") #think it s not working with mlab
+		print("id")
+		#print(next_id)
+		id = 4 #vremenniy kostil
+		views.mongo.db.services.insert({"_id":id, "username":login.lower(), "service_name": service_name, "addit_info": addit_info, "service_logo": base64.b64encode(image.read()).decode()})
 		return id
 
 
@@ -89,7 +93,7 @@ def service_coordinates(id, login, lt, lg):
 	service_belong = list(views.mongo.db.services.find({"_id":int(id), "username":login.lower()}))[0]
 	if service_belong:
 		print("begin")
-		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":int(service_belong["_id"]), "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "lt":lt, "lg":lg})
+		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":int(service_belong["_id"]), "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "lt":lt, "lg":lg})
 		print("finish")
 		return True
 	else:
@@ -103,7 +107,7 @@ def service_schedule(id, login, schedular):
 	print(schedular)
 	service_belong = list(views.mongo.db.services.find({"_id":int(id), "username":login.lower()}))[0]
 	if service_belong:
-		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":service_belong["_id"], "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "lt":service_belong["lt"], "lg":service_belong["lg"], "schedule":schedular})
+		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":service_belong["_id"], "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "lt":service_belong["lt"], "lg":service_belong["lg"], "schedule":schedular})
 		return True
 	else:
 		print("#TODO service not exsist go to first step of registration || hackers gonna suck1!")
@@ -116,3 +120,12 @@ def service_info(id):
 		return service
 	else:
 		return false
+
+
+def service_find(service_n, page):
+	services_on_page = 3
+	print(page)
+	count_of_service = len(list(views.mongo.db.services.find({"service_name":re.compile('.*'+service_n+'.*', re.IGNORECASE)})))
+	services = list(views.mongo.db.services.find({"service_name":re.compile('.*'+service_n+'.*', re.IGNORECASE) }).skip(services_on_page*int(page)).limit(services_on_page))
+
+	return count_of_service, services

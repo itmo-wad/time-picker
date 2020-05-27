@@ -151,7 +151,7 @@
           working_dates.push(check[i].innerText);
       }
       console.log(working_dates);
-      //Todo probably here is problem with using fetch because of it brokes redirect from flask
+      //Todo redirect - true
       let response = fetch('http://' + document.domain + ':' + location.port+'/date_select?id={{id}}',{
         method: 'POST',
         headers: {

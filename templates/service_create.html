@@ -54,22 +54,30 @@
       <h4>{{ message }}</h4>
     {% endfor %}
   </div>
-  <form method = "POST" action="/create_service">
+
 		<div class="input-group">
   		<div class="input-group-prepend">
-    		<span class="input-group-text" id="">Service name</span>
+    		<span class="input-group-text">Service name</span>
 		  </div>
-	 		<input class="form-control" class="input" type="text" name="name_service" placeholder="Hint: English tutor"  required>
+	 		<input class="form-control" class="input" type="text" id='serviceName' placeholder="Hint: English tutor"  required>
 		</div>
 		<div class="input-group">
 		  <div class="input-group-prepend">
 		    <span class="input-group-text">Service description</span>
 		  </div>
-		  <textarea class="form-control" aria-label="With textarea"type="text" name="additional_information" placeholder="Hint: I was a teacher at the University of Cambridge, now i decided to stay home and can't live without teaching. I like kids..."  required></textarea>
+		  <textarea class="form-control" aria-label="With textarea"type="text" id="additional_information" placeholder="Hint: I was a teacher at the University of Cambridge, now i decided to stay home and can't live without teaching. I like kids..."  required></textarea>
 		</div>
-    <button type="submit" class="form-control">Next</button>
-  </form>
 
+		<div class="custom-file">
+      <input type="file" class="custom-file-input" id="inputImage" name=file accept="image/*" onchange="previewImg(event)">
+      <label class="custom-file-label" for="inputGroupFile02" id='imglabel'>Set Image for service</label>
+    </div>
+
+    <button type="button" class="form-control" onclick=sendData()>Next</button>
+
+
+
+	<img id="preview"/>
 
 
 
@@ -79,4 +87,44 @@
  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
+
+	<script type="text/javascript">
+
+	var previewImg = function(event) {
+		var preview = document.getElementById('preview');
+		var imgText = document.getElementById('imglabel');
+		preview.src = URL.createObjectURL(event.target.files[0]);
+		preview.onload = function() {
+				URL.revokeObjectURL(preview.src) // free memory
+				imgText.innerText = 'Change image';
+			}
+	};
+
+	async function sendData(){
+		let serviceName = document.getElementById('serviceName').value;
+		let serviceDescription = document.getElementById('additional_information').value;
+		let image = document.getElementById('inputImage').files[0];
+		console.log(image);
+		var data = new FormData();
+		data.append('service_name', serviceName);
+		data.append('service_descr', serviceDescription);
+		data.append('service_image', image);
+		console.log(data);
+		let response = await fetch('http://' + document.domain + ':' + location.port+'/create_service',{
+					method: 'POST',
+					redirect: 'follow',
+					body: data
+				})
+				.then(response => {
+	        // HTTP 301 response
+	        // HOW CAN I FOLLOW THE HTTP REDIRECT RESPONSE?
+					console.log(response)
+	        if (response.redirected) {
+	            window.location.href = response.url;
+	        }
+	    });
+	}
+
+
+	</script>
 </html>

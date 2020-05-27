@@ -46,18 +46,37 @@
    </nav>
 
 
-<form method="POST" action="/find">
+
   <div class="input-group mb-3">
     <div class="input-group-prepend">
-      <button class="btn btn-outline-secondary" type="button">Find by service</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="find_service()">Find by service</button>
+      <!-- Todo: different url requests from buttons or delete one button -->
       <button class="btn btn-outline-secondary" type="button">Find by name</button>
     </div>
-    <input type="text" class="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1" required>
+    <input type="text" class="form-control" placeholder="" name="find_by" aria-describedby="basic-addon1" required>
   </div>
-</form>
 
 
 
+  <div class="card mb-3" style="max-width: 540px;">
+  <div class="row no-gutters">
+    <div class="col-md-4">
+      <img src="/static/img/barber_img.jpeg" class="card-img" alt="...">
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">Barber</h5>
+        <p class="card-text">I'm the best in this. I want to became a famous barber and now i'm looking for my regular clints, that's why price so little.</p>
+        <p class="card-text">Master: Elena Sergeevna Sokolova.</p>
+        <p class="card-text"><small class="text-muted">Desinatoon from you: 1.5 km.</small></p>
+        <p class="card-text"><small class="text-muted">Middle price: 1$</small></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id = "count">
+<div id='search-result'></div>
 
 
  </body>
@@ -65,5 +84,169 @@
  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+  <script type="text/javascript" defer>
+
+
+
+
+
+
+
+
+
+
+  let cardResult;
+
+  var example_result = [
+
+      {
+          "_id": 1,
+          "username": "blue_boy_dontcry",
+          "service_name": "Barber",
+          "addit_info": "I'm the best in this. I want to became a famous barber and now i'm looking for my regular clints, that's why price so little.",
+          "lt":"12.3",
+          "lg":"10.2",
+          "schedule":"schedule"
+
+      },
+      {
+              "_id": 2,
+              "username": "blue_boy_dontcry",
+              "service_name": "Barber",
+              "addit_info":"Info about second barber",
+              "lt":"12.3",
+              "lg":"10.2",
+              "schedule":"schedule"
+
+        },
+        {
+              "_id": 3,
+              "username": "blue_boy_dontcry",
+              "service_name": "Barber",
+              "addit_info":"Info about third barber",
+              "lt":"12.3",
+              "lg":"10.2",
+              "schedule":"schedule"
+
+          }];
+
+  let createCard = (task) => {
+
+    let card = document.createElement('div');
+    card.className = 'card mb-3';
+    card.style = "max-width: 540px;"
+
+    let cardInside = document.createElement('div');
+    cardInside.className = 'row no-gutters';
+
+    let cardImg = document.createElement('div');
+    cardImg.className = 'col-md-4';
+    let imgsrc = document.createElement("img");
+    imgsrc.className = 'card-img';
+
+    let cardBody = document.createElement('div');
+    cardBody.class = 'col-md-8';
+
+    let cardBodyInside = document.createElement('card-body');
+
+
+    let title = document.createElement('h5');
+    title.innerText = task.service_name;
+    title.className = 'card-title';
+
+    let description = document.createElement('p');
+    description.innerText = task.addit_info;
+    description.className = 'card-text';
+
+    let master_name = document.createElement('p');
+    master_name.innerText = task.username;
+    master_name.className = 'card-text';
+
+    let destination = document.createElement('p');
+    destination.innerText = task.lt;
+    master_name.className = 'card-text';
+
+    let destinationInside = document.createElement('p');
+    destinationInside.innerText = task.lt;
+    destinationInside.className = 'text-muted';
+
+
+
+
+
+
+
+
+
+    //cardResult = document.getElementById('search-result');
+    console.log("2 cardResult before appending");
+    console.log(cardResult);
+    cardResult.appendChild(card);
+    console.log("3 cardResult after appending");
+    console.log(cardResult);
+    card.appendChild(cardInside);
+    cardInside.appendChild(cardImg);
+    cardInside.appendChild(cardBody);
+    cardImg.appendChild(imgsrc);
+    cardBody.appendChild(cardBodyInside);
+    cardBodyInside.appendChild(title);
+    cardBodyInside.appendChild(description);
+    cardBodyInside.appendChild(master_name);
+    cardBodyInside.appendChild(destination);
+    destination.appendChild(destinationInside);
+
+  }
+  let initListOfTasks = (search_result) => {
+
+
+
+    cardResult = document.getElementById('search-result');
+    console.log("1 cardResult = search_result");
+    console.log(cardResult);
+    search_result.forEach((task) => {
+      createCard(task);
+    });
+
+    if (cardResult) {
+      document.getElementById('search-result').replaceWith(cardResult)
+
+      console.log("4 search_result = cardResult");
+      console.log(cardResult);
+      console.log(document.getElementById('search-result'));
+      return;
+    };
+};
+
+initListOfTasks(example_result);
+
+  async function find_service(){
+  let search_by = $( 'input.form-control' ).val()
+  let response = await fetch('http://' + document.domain + ':' + location.port+'/find?page=0',{
+    method: 'POST',
+    headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+              },
+    body: search_by
+  })
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    if (data.message != '200OK') {
+      var countLabel = document.getElementById("count");
+      countLabel.innerText = "Search result: "+data.count;
+
+      //let cardResult;
+      console.log(document.querySelector("#search-result"));
+      initListOfTasks(data.services);
+
+
+    }
+  });
+}
+
+
+  </script>
 
 </html>
