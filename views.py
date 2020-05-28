@@ -151,36 +151,64 @@ def settings_change_info():
 				return redirect(url_for("settings_change_info"))
 
 #creating new service
-#first page for add information about service
+#first page for add information about specialization
 @app.route('/create_service', methods = ['GET', 'POST'])
 def create_service():
 	if request.method == "GET":
 		if 'username' in session:
-			return render_template("service_create.html")
+			return render_template("service_create_specialization.html")
 
 		else:
 			return render_template('login_page.html')
 	#saves information and turns to next step
 	if request.method == "POST":
 		if 'username' in session:
-			#print(request.form['name_service'])
-			#print(request.form['additional_information'])
-			print("HERE I AM")
 			name_service = request.form['service_name']
 			additional_information = request.form['service_descr']
 			service_image = request.files['service_image']
-			#print(base64.b64encode(service_image.read()).decode())
 			id = mongodb_query.create_service(session['username'], name_service, additional_information, service_image)
 			#save information to DB
 			#next page | map select
 			#sending ID throught the each page of service registration
 			return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))
 			#return render_template('map.html',apikey=maps_api_key, id=id, latitude=latitude,longitude=longitude)#map.html is my HTML file name
-
-
+		else:
+			render_template("login_page.html")
 
 #creating new service
-#second page for add coordinates about service
+#second page for add services that could be done by master
+@app.route('/set_services', methods = ['GET', 'POST'])
+def set_services(id = 0):
+	if request.method == "GET":
+		if 'username' in session:
+			print("bad1")
+			id = request.args.get('id')
+			print("bad2")
+			return render_template("service_create_services.html", id=id)
+		else:
+			render_template("login_page.html")
+
+	if request.method == "POST":
+		if 'username' in session:
+			id = request.args.get('id')
+			services = request.get_json()
+			print(type(services))
+			print(services)
+			for name_service in services:
+				price = services[name_service]
+
+			#TODO: find out best way to store service names with prices
+
+			if mongodb_query.set_services(id, session['username'], services):
+
+				return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))
+			else:
+				return redirect(url_for('set_services',id=id))
+		else:
+			render_template("login_page.html")
+
+#creating new service
+#third page for add coordinates about service
 @app.route('/set_address', methods = ['GET', 'POST'])
 def set_address(id=0, lt = 59.9138, lg = 30.3483):
 	#showing updated map
@@ -189,7 +217,7 @@ def set_address(id=0, lt = 59.9138, lg = 30.3483):
 			id = request.args.get('id')
 			lat = request.args.get('lt')
 			long = request.args.get('lg')
-			return render_template('map.html',apikey=maps_api_key, id=id, latitude=lat,longitude=long)#map.html is my HTML file name
+			return render_template('service_create_map.html',apikey=maps_api_key, id=id, latitude=lat,longitude=long)#map.html is my HTML file name
 
 		else:
 			return render_template('login_page.html')
@@ -236,7 +264,7 @@ def date_select(id = 0):
 	if request.method == "GET":
 		if 'username' in session:
 			id = request.args.get('id')
-			return render_template('date_select.html', id=id)
+			return render_template('service_create_date_select.html', id=id)
 		else:
 			return render_template('login_page.html')
 	if request.method == "POST":
@@ -316,7 +344,6 @@ def find_service(page = 1, filter = 'null'):
 	if request.method == "POST":
 		if 'username' in session:
 			find_by = request.data.decode("utf-8")
-			print("SMARI SUDA")
 			filter = request.args.get('filter')
 			#TODO: implement all charakteristic and then make right requests to DB
 			print(filter)
