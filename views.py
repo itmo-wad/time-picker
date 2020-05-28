@@ -170,7 +170,7 @@ def create_service():
 			#save information to DB
 			#next page | map select
 			#sending ID throught the each page of service registration
-			return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))
+			return redirect(url_for('set_services', id=id))
 			#return render_template('map.html',apikey=maps_api_key, id=id, latitude=latitude,longitude=longitude)#map.html is my HTML file name
 		else:
 			render_template("login_page.html")

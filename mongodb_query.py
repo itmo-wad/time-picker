@@ -81,10 +81,20 @@ def create_service(login, service_name, addit_info, image):
 		#next_id = views.mongo.db.eval("getNextSequenceValue('productid')") #think it s not working with mlab
 		print("id")
 		#print(next_id)
-		id = 4 #vremenniy kostil
+		id = 5 #vremenniy kostil
 		views.mongo.db.services.insert({"_id":id, "username":login.lower(), "service_name": service_name, "addit_info": addit_info, "service_logo": base64.b64encode(image.read()).decode()})
 		return id
 
+def set_services(id, login, services):
+		#TODO: check if cant do int(id)?
+
+		#check if service is belongs to login
+		service_belong = list(views.mongo.db.services.find({"_id":int(id), "username":login.lower()}))[0]
+		if service_belong:
+			views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":int(service_belong["_id"]), "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "services":services})
+			return True
+		else:
+			return False
 
 def service_coordinates(id, login, lt, lg):
 	#TODO: check if cant do int(id)?
@@ -93,7 +103,7 @@ def service_coordinates(id, login, lt, lg):
 	service_belong = list(views.mongo.db.services.find({"_id":int(id), "username":login.lower()}))[0]
 	if service_belong:
 		print("begin")
-		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":int(service_belong["_id"]), "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "lt":lt, "lg":lg})
+		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":int(service_belong["_id"]), "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "services":service_belong["services"], "lt":lt, "lg":lg})
 		print("finish")
 		return True
 	else:
@@ -107,7 +117,7 @@ def service_schedule(id, login, schedular):
 	print(schedular)
 	service_belong = list(views.mongo.db.services.find({"_id":int(id), "username":login.lower()}))[0]
 	if service_belong:
-		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":service_belong["_id"], "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "lt":service_belong["lt"], "lg":service_belong["lg"], "schedule":schedular})
+		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":service_belong["_id"], "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "services":service_belong["services"],"lt":service_belong["lt"], "lg":service_belong["lg"], "schedule":schedular})
 		return True
 	else:
 		print("#TODO service not exsist go to first step of registration || hackers gonna suck1!")
