@@ -311,19 +311,18 @@ def service(id = 1):
 
 #Finding list of services
 @app.route('/find', methods = ['POST'])
-def find_service(page = 1):
+def find_service(page = 1, filter = 'null'):
 	#used for looking services
 	if request.method == "POST":
 		if 'username' in session:
 			find_by = request.data.decode("utf-8")
+			print("SMARI SUDA")
+			filter = request.args.get('filter')
+			#TODO: implement all charakteristic and then make right requests to DB
+			print(filter)
 			#TODO: check for int
 			page = int(request.args.get('page'))-1
-			print(type(page))
-			print(type(find_by))
-			print(page)
-			print(find_by)
 			count, result = mongodb_query.service_find(find_by, page)
-			print("HERE IS COUNT "+str(count))
 			if count:
 				print(result)
 				print("HERE")

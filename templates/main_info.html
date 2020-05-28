@@ -12,6 +12,7 @@
     }
 
 
+
     </style>
 
 
@@ -49,11 +50,26 @@
 
   <div class="input-group mb-3">
     <div class="input-group-prepend">
-      <button class="btn btn-outline-secondary" type="button" onclick="find_service(1)">Find by service</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="find_service(1, null)">Find by service</button>
       <!-- Todo: different url requests from buttons or delete one button -->
       <button class="btn btn-outline-secondary" type="button">Find by name</button>
     </div>
-    <input type="text" class="form-control" placeholder="" name="find_by" aria-describedby="basic-addon1" required>
+    <input type="text" class="form-control" placeholder="" name="find_by" aria-describedby="basic-addon1">
+  </div>
+
+
+  <div class = "filter">
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="filter" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        None filter
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+        <button class="dropdown-item" type="button" onclick="apply_filter(this)">Lowest price</button>
+        <button class="dropdown-item" type="button" onclick="apply_filter(this)">Closest destination</button>
+        <button class="dropdown-item" type="button" onclick="apply_filter(this)">High rating</button>
+        <button class="dropdown-item" type="button" onclick="apply_filter(this)">Closest time</button>
+      </div>
+    </div>
   </div>
 
 
@@ -95,6 +111,7 @@
   <script type="text/javascript" defer>
 
 
+  $('div.filter').hide();
 
 
   var example_result = [
@@ -197,12 +214,14 @@
 
   }
 
-  let init_pages = (count) => {
+  let init_pages = (count, filter) => {
     $('div.pages').empty();
+    $('div.filter').hide();
     if (count > 1) {
+      $('div.filter').show();
       for (var i = 1; i <= count; i++){
         console.log(i);
-        $( 'div.pages' ).append('<th onclick="find_service('+i+')">'+i+'</th>');
+        $( 'div.pages' ).append('<th onclick="find_service('+i+','+filter+')">'+i+'</th>');
 
       }
     }
@@ -217,10 +236,16 @@
 };
 
 //initListOfTasks(example_result);
+  function apply_filter(filter) {
+    document.getElementById("filter").innerText = filter.textContent;
+    find_service(1, filter.textContent);
+  }
 
-  async function find_service(page){
+  async function find_service(page, filter){
   let search_by = $( 'input.form-control' ).val()
-  let response = await fetch('http://' + document.domain + ':' + location.port+'/find?page='+page,{
+  var url;
+  url = 'http://' + document.domain + ':' + location.port+'/find?page='+page+'&filter='+filter;
+  let response = await fetch(url,{
     method: 'POST',
     headers: {
               'Content-Type': 'application/json;charset=utf-8'
@@ -236,7 +261,7 @@
       countLabel.innerText = "Search result: "+data.count;
       console.log(data.count/3);
       console.log(Math.ceil(data.count/3));
-      init_pages(Math.ceil(data.count/3));
+      init_pages(Math.ceil(data.count/3), filter);
       initListOfTasks(data.services);
 
 
