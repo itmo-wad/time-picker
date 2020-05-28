@@ -49,12 +49,14 @@
 
   <div class="input-group mb-3">
     <div class="input-group-prepend">
-      <button class="btn btn-outline-secondary" type="button" onclick="find_service()">Find by service</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="find_service(1)">Find by service</button>
       <!-- Todo: different url requests from buttons or delete one button -->
       <button class="btn btn-outline-secondary" type="button">Find by name</button>
     </div>
     <input type="text" class="form-control" placeholder="" name="find_by" aria-describedby="basic-addon1" required>
   </div>
+
+
 
 
 
@@ -75,8 +77,13 @@
   </div>
 </div>
 
-<div id = "count">
+
 <div id='search-result'></div>
+<div class = "search_res"></div>
+<div class = "pages">
+
+</div>
+<div id = "count">
 
 
  </body>
@@ -89,14 +96,6 @@
 
 
 
-
-
-
-
-
-
-
-  let cardResult;
 
   var example_result = [
 
@@ -144,6 +143,8 @@
     cardImg.className = 'col-md-4';
     let imgsrc = document.createElement("img");
     imgsrc.className = 'card-img';
+    imgsrc.src = 'data:image/png;base64, '+task.service_logo;
+
 
     let cardBody = document.createElement('div');
     cardBody.class = 'col-md-8';
@@ -180,11 +181,7 @@
 
 
     //cardResult = document.getElementById('search-result');
-    console.log("2 cardResult before appending");
-    console.log(cardResult);
-    cardResult.appendChild(card);
-    console.log("3 cardResult after appending");
-    console.log(cardResult);
+    //cardResult.appendChild(card);
     card.appendChild(cardInside);
     cardInside.appendChild(cardImg);
     cardInside.appendChild(cardBody);
@@ -195,34 +192,35 @@
     cardBodyInside.appendChild(master_name);
     cardBodyInside.appendChild(destination);
     destination.appendChild(destinationInside);
+    $( 'div.search_res' ).append(card);
+    console.log("last mesaage");
 
   }
+
+  let init_pages = (count) => {
+    $('div.pages').empty();
+    if (count > 1) {
+      for (var i = 1; i <= count; i++){
+        console.log(i);
+        $( 'div.pages' ).append('<th onclick="find_service('+i+')">'+i+'</th>');
+
+      }
+    }
+  }
+
+
   let initListOfTasks = (search_result) => {
-
-
-
-    cardResult = document.getElementById('search-result');
-    console.log("1 cardResult = search_result");
-    console.log(cardResult);
+    $('div.search_res').empty();
     search_result.forEach((task) => {
       createCard(task);
     });
-
-    if (cardResult) {
-      document.getElementById('search-result').replaceWith(cardResult)
-
-      console.log("4 search_result = cardResult");
-      console.log(cardResult);
-      console.log(document.getElementById('search-result'));
-      return;
-    };
 };
 
-initListOfTasks(example_result);
+//initListOfTasks(example_result);
 
-  async function find_service(){
+  async function find_service(page){
   let search_by = $( 'input.form-control' ).val()
-  let response = await fetch('http://' + document.domain + ':' + location.port+'/find?page=0',{
+  let response = await fetch('http://' + document.domain + ':' + location.port+'/find?page='+page,{
     method: 'POST',
     headers: {
               'Content-Type': 'application/json;charset=utf-8'
@@ -236,9 +234,9 @@ initListOfTasks(example_result);
     if (data.message != '200OK') {
       var countLabel = document.getElementById("count");
       countLabel.innerText = "Search result: "+data.count;
-
-      //let cardResult;
-      console.log(document.querySelector("#search-result"));
+      console.log(data.count/3);
+      console.log(Math.ceil(data.count/3));
+      init_pages(Math.ceil(data.count/3));
       initListOfTasks(data.services);
 
 
