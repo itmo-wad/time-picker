@@ -160,6 +160,11 @@
 
   let createCard = (task) => {
 
+
+    let card_href = document.createElement('a');
+    card_href.setAttribute("href", 'http://' + document.domain + ':' + location.port+"/service?id="+task._id)
+    card_href.style = "text-decoration: inherit; color: black;"
+
     let card = document.createElement('div');
     card.className = 'card mb-3';
     card.style = "max-width: 540px;"
@@ -215,6 +220,7 @@
 
     //cardResult = document.getElementById('search-result');
     //cardResult.appendChild(card);
+    card_href.appendChild(card);
     card.appendChild(cardInside);
     cardInside.appendChild(cardImg);
     cardInside.appendChild(cardBody);
@@ -228,7 +234,7 @@
     cardBodyInside.appendChild(middle_price);
     middle_price.appendChild(middle_priceInside);
 
-    $( 'div.search_res' ).append(card);
+    $( 'div.search_res' ).append(card_href);
     console.log("last mesaage");
 
   }
@@ -247,12 +253,15 @@
   }
 
 
+
+
   let initListOfTasks = (search_result) => {
     $('div.search_res').empty();
     search_result.forEach((task) => {
       createCard(task);
     });
 };
+
 
 //initListOfTasks(example_result);
   function apply_filter(filter) {

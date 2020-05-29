@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+<style type="text/css">
+  body {
+
+    margin: 10%;
+  }
+  .flash {
+    font-size: 15px;
+    color: #AA0000;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+
+
+
+  </style>
+
+</head>
+<body>
+
+<h1>Messanger</h1>
+
+<div class = 'chat_window'>
+  <h3>There is no message yet!</h3>
+  <h3>You can type --help :)</h3>
+</div>
+
+
+<form method="POST" action="posthere/" class = 'form'>
+      <input type="message" class="form-control" name="message" placeholder="type message here"  required>
+      <button type="submit" class="btn btn-outline-secondary btn-block">Login</button>
+
+  </form>
+
+
+
+
+
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+      <script type="text/javascript">
+        var socket = io.connect('https://' + document.domain + ':' + location.port);
+
+        socket.on( 'connect', function() {
+          socket.emit( 'my event', {
+            data: 'User Connected'
+          } )
+          var form = $( 'form' ).on( 'submit', function( e ) {
+            e.preventDefault()
+            let user_name = 'user'
+            let user_input = $( 'input.new_message' ).val()
+            socket.emit( 'user_send', {
+              user_name : user_name,
+              message : user_input
+            }
+            )
+            $( 'input.new_message' ).val( '' ).focus()
+          } )
+        } )
+        socket.on( 'my response', function( msg ) {
+          console.log( msg )
+            $( 'h3' ).remove()
+            $( 'div.chat_window' ).append( '<div class="container"> <img src="/static/user.png" alt="Avatar" style="width:100%;"><p>'+msg.message+'</p><span class="time-right">11:02</span></div>' )
+            if (msg.message.indexOf('--')+1){ socket.emit( 'bot_command', {})} else {socket.emit( 'bot_response', {})}
+
+        })
+        socket.on( 'bot response', function( msg ) {
+          console.log( msg )
+            $( 'div.chat_window' ).append( '<div class="container darker"> <img src="/static/robot.jpeg" alt="Avatar" style="width:100%;"><p>'+msg.message+'</p><span class="time-left">11:02</span></div>' )
+        })
+      </script>
+
+</body>
+</html>

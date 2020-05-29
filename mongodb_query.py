@@ -162,3 +162,43 @@ def find(find_by, keyword, page, filter):
 			services = list(views.mongo.db.services.find({"services_names":re.compile('.*'+keyword+'.*', re.IGNORECASE)}).skip(services_on_page*int(page)).limit(services_on_page))
 
 	return count_of_service, services
+
+
+
+#for messanger
+
+def get_list_chats(nickname):
+	chats = list(views.mongo.db.chats.find({"participants":nickname}))[0]
+	return chats
+
+def get_last_message(sender, receiver):
+	chat_id = chat_id(sender, receiver)
+	message = list(views.mongo.db.messages.find({ "$query": {"chat_id":chat_id, "$orderby": { "date" : -1 }, "$limit": 1}))[0]
+
+	return message["chat_id"]
+
+def chat_id(sender_nick, receiver_nick):
+	check = [sender_nick, receiver_nick]
+	check = sorted(check)
+	chat_exist = list(views.mongo.db.chats.find({"participants":check}))[0]
+	if chat_exist:
+		return chat_exist["chat_id"]
+	else:
+		#next_id = views.mongo.db.eval("getNextSequenceValue('chatID')") #think it s not working with mlab
+		print("id")
+		#print(next_id)
+		chat_id = 2 #vremenniy kostil
+		views.mongo.db.chats.insert({"chat_id":chat_id,"participants":check})
+		return chat_id
+
+
+def new_message(sender, receiver, message, date):
+	chat_id = chat_id(sender, receiver)
+	views.mongo.db.messages.insert({"sender":sender,"chat_id":chat_id, "message_body":message, "date":date})
+
+
+
+def get_messages(sender, receiver):
+	chat_id = chat_id(sender, receiver)
+	messages = views.mongo.db.messages.find({ "$query": {"chat_id":chat_id, "$orderby": { "date" : -1 }})
+	return messages

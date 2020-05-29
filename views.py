@@ -422,6 +422,26 @@ def upload_file():
 		return redirect ('/')
 
 
+@app.route('/messanger', methods = ["POST", "GET"])
+def messanger():
+	return render_template('messanger.html')
+
+
+
+@app.route('/chatlist', methods = ["POST"])
+def chatlist():
+	if 'username' in session:
+		if request.method == 'POST':
+			#go for mongo
+			chats = mongodb_query.get_list_chats(session['username'])
+
+			for nickname_receiver in chats:#iterate through senders nicknames
+				message = get_last_message(session['username'], nickname_receiver)
+				dict_mes[nickname_receiver] = message
+			return jsonify(dict_mes)
+
+
+
 
 
 
