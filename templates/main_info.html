@@ -50,9 +50,9 @@
 
   <div class="input-group mb-3">
     <div class="input-group-prepend">
-      <button class="btn btn-outline-secondary" type="button" onclick="find_service(1, null)">Find by service</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="url_for_specializaion()">Find by specialization</button>
       <!-- Todo: different url requests from buttons or delete one button -->
-      <button class="btn btn-outline-secondary" type="button">Find by name</button>
+      <button class="btn btn-outline-secondary" type="button" onclick="url_for_services()">Find by service</button>
     </div>
     <input type="text" class="form-control" placeholder="" name="find_by" aria-describedby="basic-addon1">
   </div>
@@ -113,6 +113,17 @@
 
   $('div.filter').hide();
 
+  var url;
+
+  function url_for_specializaion () {
+    url = 'http://' + document.domain + ':' + location.port+'/find?key=specialist';
+    search(1, null);
+  }
+
+  function url_for_services () {
+    url = 'http://' + document.domain + ':' + location.port+'/find?key=service'
+    search(1, null);
+  }
 
   var example_result = [
 
@@ -182,13 +193,18 @@
     master_name.className = 'card-text';
 
     let destination = document.createElement('p');
-    destination.innerText = task.lt;
-    master_name.className = 'card-text';
+    destination.className = 'card-text';
 
-    let destinationInside = document.createElement('p');
-    destinationInside.innerText = task.lt;
+    let destinationInside = document.createElement('small');
+    destinationInside.innerText = "Coordinates lt: "+task.lt;
     destinationInside.className = 'text-muted';
 
+    let middle_price = document.createElement('p');
+    middle_price.className = 'card-text';
+
+    let middle_priceInside = document.createElement('small');
+    middle_priceInside.innerText = 'Middle price: '+task.middle_price;
+    middle_priceInside.className = 'text-muted';
 
 
 
@@ -209,6 +225,9 @@
     cardBodyInside.appendChild(master_name);
     cardBodyInside.appendChild(destination);
     destination.appendChild(destinationInside);
+    cardBodyInside.appendChild(middle_price);
+    middle_price.appendChild(middle_priceInside);
+
     $( 'div.search_res' ).append(card);
     console.log("last mesaage");
 
@@ -221,7 +240,7 @@
       $('div.filter').show();
       for (var i = 1; i <= count; i++){
         console.log(i);
-        $( 'div.pages' ).append('<th onclick="find_service('+i+','+filter+')">'+i+'</th>');
+        $( 'div.pages' ).append('<th onclick="search('+i+','+filter+')">'+i+'</th>');
 
       }
     }
@@ -238,14 +257,15 @@
 //initListOfTasks(example_result);
   function apply_filter(filter) {
     document.getElementById("filter").innerText = filter.textContent;
-    find_service(1, filter.textContent);
+    search(1, filter.textContent);
   }
 
-  async function find_service(page, filter){
+  async function search(page, filter){
   let search_by = $( 'input.form-control' ).val()
-  var url;
-  url = 'http://' + document.domain + ':' + location.port+'/find?page='+page+'&filter='+filter;
-  let response = await fetch(url,{
+  var request;
+  console.log(url);
+  request = url+'&page='+page+'&filter='+filter;
+  let response = await fetch(request,{
     method: 'POST',
     headers: {
               'Content-Type': 'application/json;charset=utf-8'

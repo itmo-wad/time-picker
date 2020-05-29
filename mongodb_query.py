@@ -81,17 +81,17 @@ def create_service(login, service_name, addit_info, image):
 		#next_id = views.mongo.db.eval("getNextSequenceValue('productid')") #think it s not working with mlab
 		print("id")
 		#print(next_id)
-		id = 5 #vremenniy kostil
+		id = 7 #vremenniy kostil
 		views.mongo.db.services.insert({"_id":id, "username":login.lower(), "service_name": service_name, "addit_info": addit_info, "service_logo": base64.b64encode(image.read()).decode()})
 		return id
 
-def set_services(id, login, services):
+def set_services(id, login, services_names, services_prices, middle_price):
 		#TODO: check if cant do int(id)?
 
 		#check if service is belongs to login
 		service_belong = list(views.mongo.db.services.find({"_id":int(id), "username":login.lower()}))[0]
 		if service_belong:
-			views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":int(service_belong["_id"]), "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "services":services})
+			views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":int(service_belong["_id"]), "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "services_names":services_names, "services_prices":services_prices, "middle_price":middle_price})
 			return True
 		else:
 			return False
@@ -103,7 +103,7 @@ def service_coordinates(id, login, lt, lg):
 	service_belong = list(views.mongo.db.services.find({"_id":int(id), "username":login.lower()}))[0]
 	if service_belong:
 		print("begin")
-		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":int(service_belong["_id"]), "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "services":service_belong["services"], "lt":lt, "lg":lg})
+		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":int(service_belong["_id"]), "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "services_names":service_belong["services_names"], "services_prices":service_belong["services_prices"], "middle_price":service_belong["middle_price"], "lt":lt, "lg":lg})
 		print("finish")
 		return True
 	else:
@@ -117,7 +117,7 @@ def service_schedule(id, login, schedular):
 	print(schedular)
 	service_belong = list(views.mongo.db.services.find({"_id":int(id), "username":login.lower()}))[0]
 	if service_belong:
-		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":service_belong["_id"], "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "services":service_belong["services"],"lt":service_belong["lt"], "lg":service_belong["lg"], "schedule":schedular})
+		views.mongo.db.services.update({"_id":int(id), "username":login.lower()}, {"_id":service_belong["_id"], "username":service_belong["username"], "service_name": service_belong["service_name"], "addit_info": service_belong["addit_info"], "service_logo":service_belong["service_logo"], "services_names":service_belong["services_names"], "services_prices":service_belong["services_prices"], "middle_price":service_belong["middle_price"], "lt":service_belong["lt"], "lg":service_belong["lg"], "schedule":schedular})
 		return True
 	else:
 		print("#TODO service not exsist go to first step of registration || hackers gonna suck1!")
@@ -132,10 +132,33 @@ def service_info(id):
 		return false
 
 
-def service_find(service_n, page):
+def find(find_by, keyword, page, filter):
 	services_on_page = 3
-	print(page)
-	count_of_service = len(list(views.mongo.db.services.find({"service_name":re.compile('.*'+service_n+'.*', re.IGNORECASE)})))
-	services = list(views.mongo.db.services.find({"service_name":re.compile('.*'+service_n+'.*', re.IGNORECASE) }).skip(services_on_page*int(page)).limit(services_on_page))
+	if find_by == "specialist":
+
+		count_of_service = len(list(views.mongo.db.services.find({"service_name":re.compile('.*'+keyword+'.*', re.IGNORECASE)})))
+		if filter == 'null':
+			services = list(views.mongo.db.services.find({"service_name":re.compile('.*'+keyword+'.*', re.IGNORECASE) }).skip(services_on_page*int(page)).limit(services_on_page))
+		elif filter == 'Lowest price':
+			print("sorted by lowest price")
+			services = list(views.mongo.db.services.find({ "$query": {"service_name":re.compile('.*'+keyword+'.*', re.IGNORECASE)}, "$orderby": { "middle_price" : 1 }}).skip(services_on_page*int(page)).limit(services_on_page))
+		elif filter == 'Closest destination':
+			services = list(views.mongo.db.services.find({"service_name":re.compile('.*'+keyword+'.*', re.IGNORECASE) }).skip(services_on_page*int(page)).limit(services_on_page))
+		elif filter == 'High rating':
+			services = list(views.mongo.db.services.find({ "$query": {"service_name":re.compile('.*'+keyword+'.*', re.IGNORECASE) }, "$orderby": { "rating" : -1 }}).skip(services_on_page*int(page)).limit(services_on_page))
+		elif filter == 'Closest time':
+			services = list(views.mongo.db.services.find({"service_name":re.compile('.*'+keyword+'.*', re.IGNORECASE) }).skip(services_on_page*int(page)).limit(services_on_page))
+	elif find_by == "service":
+		count_of_service = len(list(views.mongo.db.services.find({"services_names":re.compile('.*'+keyword+'.*', re.IGNORECASE)})))
+		if filter == 'null':
+			services = list(views.mongo.db.services.find({"services_names":re.compile('.*'+keyword+'.*', re.IGNORECASE)}).skip(services_on_page*int(page)).limit(services_on_page))
+		elif filter == 'Lowest price':
+			services = list(views.mongo.db.services.find({ "$query": {"services_names":re.compile('.*'+keyword+'.*', re.IGNORECASE)}, "$orderby": { "middle_price" : 1 }}).skip(services_on_page*int(page)).limit(services_on_page))
+		elif filter == 'Closest destination':
+			services = list(views.mongo.db.services.find({"services_names":re.compile('.*'+keyword+'.*', re.IGNORECASE)}).skip(services_on_page*int(page)).limit(services_on_page))
+		elif filter == 'High rating':
+			services = list(views.mongo.db.services.find({ "$query": {"services_names":re.compile('.*'+keyword+'.*', re.IGNORECASE)}, "$orderby": { "rating" : -1 }}).skip(services_on_page*int(page)).limit(services_on_page))
+		elif filter == 'Closest time':
+			services = list(views.mongo.db.services.find({"services_names":re.compile('.*'+keyword+'.*', re.IGNORECASE)}).skip(services_on_page*int(page)).limit(services_on_page))
 
 	return count_of_service, services

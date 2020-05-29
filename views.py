@@ -170,6 +170,7 @@ def create_service():
 			#save information to DB
 			#next page | map select
 			#sending ID throught the each page of service registration
+			#return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))
 			return redirect(url_for('set_services', id=id))
 			#return render_template('map.html',apikey=maps_api_key, id=id, latitude=latitude,longitude=longitude)#map.html is my HTML file name
 		else:
@@ -181,9 +182,7 @@ def create_service():
 def set_services(id = 0):
 	if request.method == "GET":
 		if 'username' in session:
-			print("bad1")
 			id = request.args.get('id')
-			print("bad2")
 			return render_template("service_create_services.html", id=id)
 		else:
 			render_template("login_page.html")
@@ -191,15 +190,21 @@ def set_services(id = 0):
 	if request.method == "POST":
 		if 'username' in session:
 			id = request.args.get('id')
-			services = request.get_json()
-			print(type(services))
-			print(services)
-			for name_service in services:
-				price = services[name_service]
+
+			services_prices = request.get_json()
+			services_names = []
+			summ_prices = 0
+			count = 0
+			for name_service in services_prices:
+				services_names.append(name_service)
+				summ_prices += services_prices[name_service]
+				count +=1
+
+			middle_price = summ_prices/count
 
 			#TODO: find out best way to store service names with prices
 
-			if mongodb_query.set_services(id, session['username'], services):
+			if mongodb_query.set_services(id, session['username'], services_names, services_prices, middle_price):
 
 				return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))
 			else:
@@ -233,8 +238,6 @@ def set_address(id=0, lt = 59.9138, lg = 30.3483):
 			data = r.json()
 			latitude = data['items'][0]['position']['lat']
 			longitude = data['items'][0]['position']['lng']
-			print(latitude)
-			print(longitude)
 			return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))#map.html is my HTML file name
 
 
@@ -249,7 +252,6 @@ def save_coordinate(id = 0, lt=0, lg=0):
 			id = request.args.get('id')
 			lat = request.args.get('lt')
 			long = request.args.get('lg')
-			print(session['username'],lat, long)
 			if mongodb_query.service_coordinates(id, session['username'], lat, long):
 				return redirect(url_for('date_select', id=id))
 			else:
@@ -271,7 +273,6 @@ def date_select(id = 0):
 		if 'username' in session:
 			id = request.args.get('id')
 			get_schedular = request.get_json()
-			print(get_schedular)
 			#ALSO SHOULD ASK about how much work takes time to split working hours
 			#save date time to DB
 			#check if everything ok then return created page
@@ -283,7 +284,6 @@ def date_select(id = 0):
 				time = (int(data[1].split("-")[1])-int(data[1].split('-')[0]))
 				set_schedular[data[0]] = data[1]
 
-			print(set_schedular)
 			if mongodb_query.service_schedule(id, session['username'], set_schedular):
 				print("SHOULD REDICRECT!!!!111")
 				return redirect(url_for('service',id=id))
@@ -339,6 +339,39 @@ def service(id = 1):
 
 #Finding list of services
 @app.route('/find', methods = ['POST'])
+def find_specialist(key = 'specialist', page = 1, filter = 'null'):
+	#used for looking services
+	if request.method == "POST":
+		if 'username' in session:
+			keyword = request.data.decode("utf-8")
+			filter = request.args.get('filter')
+			find_by = request.args.get('key')
+			#TODO: implement all charakteristic and then make right requests to DB
+			print(filter)
+			#TODO: check for int
+			page = int(request.args.get('page'))-1
+			if find_by == "specialist":
+				count, result = mongodb_query.find(find_by, keyword, page, filter)
+			elif find_by == "service":
+				count, result = mongodb_query.find(find_by, keyword, page, filter)
+
+
+
+			if count:
+				return jsonify({'count':count, 'services':result})
+				#return render_template('main_info.html',page=page, count=count, services=json.dumps(result))
+			else:
+				#there is no such service
+				#Todo: show that no info found
+				return render_template("mainpage")
+	#used for next page view
+	if request.method == "GET":
+		if 'username' in session:
+			find_by = request.data.decode("utf-8")
+
+"""
+#Finding list of services
+@app.route('/find_service', methods = ['POST'])
 def find_service(page = 1, filter = 'null'):
 	#used for looking services
 	if request.method == "POST":
@@ -363,7 +396,7 @@ def find_service(page = 1, filter = 'null'):
 	if request.method == "GET":
 		if 'username' in session:
 			find_by = request.data.decode("utf-8")
-
+"""
 
 
 #uploading a picture from settings
