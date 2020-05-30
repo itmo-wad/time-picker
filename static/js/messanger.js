@@ -169,6 +169,7 @@ async function sendMessage() {
   }
 }
 
+var my_nick = "admin";
 
 async function msgs_from_chat(id){
   url = 'http://' + document.domain + ':' + location.port+'/get_messages?id='+id;
@@ -185,21 +186,45 @@ async function msgs_from_chat(id){
     if (data.message != '200OK') {
 
       var message = Object.keys(data);
-      message.forEach( function(key) {
-        var values = data[message]
-        if (data[message]["sender"] == my_nick) {
-          show_send_mes(data[message]["message_body"], data[message]["date"]);
+
+      for (var i=0; i<data["data"].length; i++){
+        if (data["data"][i]["sender"] == my_nick) {
+          show_send_mes(data["data"][i]["message_body"], data["data"][i]["date"]);
         } else {
-          show_receive_msg(data[message]["message_body"], data[message]["date"]);
+          show_receive_msg(data["data"][i]["message_body"], data["data"][i]["date"]);
         }
-        // do stuff with "values"
-      })
-
-
-    }
-  })
+      }
+    }})
   };
 
+
+var last_update_time = new Date().toISOString();
+var request_time = new Date().toISOString();
+console.log(request_time);
+
+async function get_new_messages(id) {
+  url = 'http://' + document.domain + ':' + location.port+'/get_new_messages?id='+id;
+  request_time = new Date().toISOString();
+  let request_for_messages = await fetch(url,{
+    method: 'POST',
+    headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+            },
+    body: [request_time,last_update_time]
+  })
+  .then((response) => {
+    last_update_time = request_time;
+    return response.json();
+  })
+  .then((data) => {
+    if (data.message != '200OK') {
+      console.log(data["new_msgs"]);
+
+    }})
+
+};
+
+setInterval(function() { get_new_messages(1); }, 1000)
 
 
 
@@ -225,8 +250,8 @@ async function append_chats() {
         var message = data[opened_chats]["message_body"]
         var sender = data[opened_chats]["sender"]
         init_chats(data[opened_chats])
-        console.log(values)
-        console.log(sender);
+        //console.log(values)
+        //console.log(sender);
         // do stuff with "values"
       })
 

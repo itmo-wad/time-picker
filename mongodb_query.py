@@ -198,7 +198,18 @@ def new_message(sender, receiver, message, date):
 
 
 
-def get_messages(sender, receiver):
-	chat_id = get_chat_id(sender, receiver)
-	messages = views.mongo.db.messages.find({ "$query": {"chat_id":chat_id}, "$orderby": { "date" : -1 }})
+def get_messages(chat_id):
+	print(chat_id)
+	messages = list(views.mongo.db.messages.find({"chat_id":chat_id}, { "_id": 0}))
+	print(type(messages))
+	print(messages)
+	print("done")
 	return messages
+
+
+
+def get_new_messages(chat_id, username, start_time, end_time):
+    print(type(start_time))
+    #messages = list(views.mongo.db.messages.find({"chat_id":chat_id, 'date': {'$lt': {'$dateFromString': {'dateString': start_time}}, '$gte': {'$dateFromString': {'dateString': end_time}}}},  { "_id": 0} ))
+    messages = list(views.mongo.db.messages.find({"chat_id":chat_id, 'date': {'$lt': start_time, '$gte': end_time}},  { "_id": 0} ))
+    return messages
