@@ -23,7 +23,64 @@ OR "outgoing_msg"
 
 var img_link = "https://ptetutorials.com/images/user-profile.png"
 
-let show_receive_msg = (message) => {
+
+function select_chat(chat_id){
+  var div_history = document.getElementById('msg_history');
+  div_history.innerHTML = '';
+  msgs_from_chat(chat_id);
+
+}
+
+let init_chats = (chat_info) => {
+
+
+  let chat_list = document.createElement('div');
+  chat_list.className = 'chat_list';
+  chat_list.setAttribute("onclick", "select_chat("+chat_info["chat_id"]+")")
+
+  let chat_people = document.createElement('div');
+  chat_people.className = 'chat_people';
+
+  let chat_img = document.createElement('div');
+  chat_img.className = 'chat_img';
+
+  let image = document.createElement('img');
+  image.src = "https://ptetutorials.com/images/user-profile.png";
+  image.setAttribute("alt", "sunil")
+
+
+  let chat_ib = document.createElement('div');
+  chat_ib.className = 'chat_ib';
+
+  let nickname = document.createElement('h5');
+  nickname.innerText = chat_info["sender"];
+
+  let date = document.createElement('span');
+  date.className = 'chat_date';
+  date.innerText = chat_info["date"];
+
+  let mes_container = document.createElement('p');
+  mes_container.innerText = chat_info["message_body"];
+
+
+  chat_list.appendChild(chat_people);
+  chat_people.appendChild(chat_img);
+  chat_people.appendChild(chat_ib);
+  chat_ib.appendChild(nickname);
+  nickname.appendChild(date);
+  chat_ib.appendChild(mes_container);
+
+
+  var div_chats = document.getElementById('chats');
+
+  div_chats.appendChild(chat_list);
+
+}
+
+
+
+
+let show_receive_msg = (message, time) => {
 
 
   let incoming = document.createElement('div');
@@ -50,7 +107,7 @@ let show_receive_msg = (message) => {
   let date = document.createElement('span');
   date.className = 'time_date';
   var d = new Date();
-  date.innerText = "    |    TODAY";
+  date.innerText = time;
 
 
   incoming.appendChild(image_div);
@@ -68,7 +125,7 @@ let show_receive_msg = (message) => {
 
 }
 
-let show_send_mes = (message) => {
+let show_send_mes = (message, time) => {
 
 
   let outgoing = document.createElement('div');
@@ -85,7 +142,7 @@ let show_send_mes = (message) => {
   date.className = 'time_date';
   var d = new Date();
 
-  date.innerText = "    |    TODAY";
+  date.innerText = time;
 
 
   outgoing.appendChild(sent);
@@ -93,9 +150,9 @@ let show_send_mes = (message) => {
   sent.appendChild(date);
 
 
-  var div_history = document.getElementById('msg_history');
+  var history_messages = document.getElementById('msg_history');
 
-  div_history.appendChild(outgoing);
+  history_messages.appendChild(outgoing);
   //$( 'div.container.messaging.inbox_msg.mesgs.msg_history' ).append(outgoing);
 
 }
@@ -111,3 +168,71 @@ async function sendMessage() {
 
   }
 }
+
+
+async function msgs_from_chat(id){
+  url = 'http://' + document.domain + ':' + location.port+'/get_messages?id='+id;
+  let request_for_chats = await fetch(url,{
+    method: 'POST',
+    headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+              }
+  })
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    if (data.message != '200OK') {
+
+      var message = Object.keys(data);
+      message.forEach( function(key) {
+        var values = data[message]
+        if (data[message]["sender"] == my_nick) {
+          show_send_mes(data[message]["message_body"], data[message]["date"]);
+        } else {
+          show_receive_msg(data[message]["message_body"], data[message]["date"]);
+        }
+        // do stuff with "values"
+      })
+
+
+    }
+  })
+  };
+
+
+
+
+async function append_chats() {
+  url = 'http://' + document.domain + ':' + location.port+'/chatlist';
+  let request_for_chats = await fetch(url,{
+    method: 'POST',
+    headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+              }
+  })
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    if (data.message != '200OK') {
+
+      var opened_chats = Object.keys(data);
+      opened_chats.forEach( function(key) {
+        var values = data[opened_chats]
+        var href = data[opened_chats]["chat_id"]
+        var date = data[opened_chats]["date"]
+        var message = data[opened_chats]["message_body"]
+        var sender = data[opened_chats]["sender"]
+        init_chats(data[opened_chats])
+        console.log(values)
+        console.log(sender);
+        // do stuff with "values"
+      })
+
+
+    }
+  })
+};
+
+  append_chats()

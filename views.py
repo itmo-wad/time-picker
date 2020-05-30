@@ -434,11 +434,21 @@ def chatlist():
 		if request.method == 'POST':
 			#go for mongo
 			chats = mongodb_query.get_list_chats(session['username'])
-
-			for nickname_receiver in chats:#iterate through senders nicknames
-				message = get_last_message(session['username'], nickname_receiver)
-				dict_mes[nickname_receiver] = message
-			return jsonify(dict_mes)
+			dict_messages = {}
+			for chat in chats:#iterate through senders nicknames
+				print(chat)
+				for nickname in chat["participants"]:
+					print (nickname)
+					if nickname != session['username']:
+						receiver = nickname
+						break
+				message = mongodb_query.get_last_message(session['username'], receiver)
+				print(type(message))
+				print(message)
+				del message['_id']
+				dict_messages[receiver] = message
+			print(dict_messages)
+			return jsonify(dict_messages)
 
 
 
