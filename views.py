@@ -517,10 +517,17 @@ def chatlist():
 
 
 
+@app.route('/check', methods = ["POST", "GET"])
+def check():
+	if 'username' in session:
+		mongodb_query.check_func_mongo()
+		jsonify(success=True)
 
-
-
-
+@app.route('/created_services', method = ["POST", "GET"])
+def created_services():
+	if 'username' in session:
+		if request.method == 'GET':
+			return render_template('created_services.html')
 
 if __name__ == "__main__":
 	app.run(host='0.0.0.0', debug=True)
