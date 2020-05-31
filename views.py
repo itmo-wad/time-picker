@@ -523,11 +523,15 @@ def check():
 		mongodb_query.check_func_mongo()
 		jsonify(success=True)
 
-@app.route('/created_services', method = ["POST", "GET"])
+@app.route('/created_services', methods = ["POST", "GET"])
 def created_services():
 	if 'username' in session:
 		if request.method == 'GET':
 			return render_template('created_services.html')
+		if request.method == 'POST':
+			services = mongodb_query.get_services(session["username"])
+
+			return jsonify({"services":services})
 
 if __name__ == "__main__":
 	app.run(host='0.0.0.0', debug=True)

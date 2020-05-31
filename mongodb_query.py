@@ -210,3 +210,8 @@ def get_new_messages(chat_id, username, start_time, end_time):
 
 	messages = list(views.mongo.db.messages.find({"chat_id":int(chat_id), 'date': {'$lt': start_time, '$gte': end_time}},  { "_id": 0} ))
 	return messages
+
+
+def get_services(username):
+    services = list(views.mongo.db.services.find({"username":username }))
+    return services
