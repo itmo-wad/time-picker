@@ -21,13 +21,29 @@ OR "outgoing_msg"
 
 */
 
-var img_link = "https://ptetutorials.com/images/user-profile.png"
 
+var img_link = "https://ptetutorials.com/images/user-profile.png"
+var my_nick = 'none'
+who_am_i()
+append_chats()
+var id = location.search.split('id=')[1]
+console.log(id);
+
+  if (id != 0) {
+
+    //kostil todo || uses only for clear interval next time
+    interval = setInterval(function() { get_new_messages(chat_id); }, 5000)
+    select_chat(id);
+  }
 
 function select_chat(chat_id){
   var div_history = document.getElementById('msg_history');
   div_history.innerHTML = '';
+  document.getElementById("sendbut").onclick = function() { sendMessage(chat_id); }
+  //Todo change class name of children document.getElementById('chats'); to 'chat_list' except selected 'chat_list active_chat'
   msgs_from_chat(chat_id);
+  clearInterval(interval)
+  interval = setInterval(function() { get_new_messages(chat_id); }, 5000)
 
 }
 
@@ -158,21 +174,29 @@ let show_send_mes = (message, time) => {
 }
 
 
-async function sendMessage() {
+async function sendMessage(chat_id) {
+  console.log(my_nick);
   let message = document.getElementById('message').value;
-  if (message.value.length == 0) {
+  if (message.length != 0) {
     message.value = '';
-    show_send_mes(message);
-    console.log(message);
+    //show_send_mes(message);
+    url = 'http://' + document.domain + ':' + location.port+'/send_message?id='+chat_id;
 
+    let request_for_chats = await fetch(url,{
+      method: 'POST',
+      headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+              },
+      body: message
+    })
 
   }
 }
 
-var my_nick = "admin";
 
-async function msgs_from_chat(id){
-  url = 'http://' + document.domain + ':' + location.port+'/get_messages?id='+id;
+
+async function msgs_from_chat(chat_id){
+  url = 'http://' + document.domain + ':' + location.port+'/get_messages?id='+chat_id;
   let request_for_chats = await fetch(url,{
     method: 'POST',
     headers: {
@@ -185,9 +209,10 @@ async function msgs_from_chat(id){
   .then((data) => {
     if (data.message != '200OK') {
 
-      var message = Object.keys(data);
+
 
       for (var i=0; i<data["data"].length; i++){
+        console.log(data["data"][i]);
         if (data["data"][i]["sender"] == my_nick) {
           show_send_mes(data["data"][i]["message_body"], data["data"][i]["date"]);
         } else {
@@ -200,10 +225,13 @@ async function msgs_from_chat(id){
 
 var last_update_time = new Date().toISOString();
 var request_time = new Date().toISOString();
-console.log(request_time);
 
-async function get_new_messages(id) {
-  url = 'http://' + document.domain + ':' + location.port+'/get_new_messages?id='+id;
+
+
+
+
+async function get_new_messages(chat_id) {
+  url = 'http://' + document.domain + ':' + location.port+'/get_new_messages?id='+chat_id;
   request_time = new Date().toISOString();
   let request_for_messages = await fetch(url,{
     method: 'POST',
@@ -219,13 +247,37 @@ async function get_new_messages(id) {
   .then((data) => {
     if (data.message != '200OK') {
       console.log(data["new_msgs"]);
+      for (var i=0; i<data["new_msgs"].length; i++){
+        if (data["new_msgs"][i]["sender"] == my_nick) {
+          show_send_mes(data["new_msgs"][i]["message_body"], data["new_msgs"][i]["date"]);
+        } else {
+          show_receive_msg(data["new_msgs"][i]["message_body"], data["new_msgs"][i]["date"]);
+        }
+      }
 
     }})
 
 };
 
-setInterval(function() { get_new_messages(1); }, 1000)
 
+async function who_am_i() {
+  url = 'http://' + document.domain + ':' + location.port+'/who_am_i';
+  let request_for_messages = await fetch(url,{
+    method: 'POST',
+    headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+            }
+  })
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    if (data.message != '200OK') {
+      my_nick = data["nick"];
+
+    }})
+
+};
 
 
 async function append_chats() {
@@ -242,22 +294,22 @@ async function append_chats() {
   .then((data) => {
     if (data.message != '200OK') {
 
-      var opened_chats = Object.keys(data);
-      opened_chats.forEach( function(key) {
-        var values = data[opened_chats]
-        var href = data[opened_chats]["chat_id"]
-        var date = data[opened_chats]["date"]
-        var message = data[opened_chats]["message_body"]
-        var sender = data[opened_chats]["sender"]
-        init_chats(data[opened_chats])
-        //console.log(values)
-        //console.log(sender);
-        // do stuff with "values"
-      })
+      console.log(data["chats"]);
+
+      for (var i = 0; i<data["chats"].length; i++) {
+        var opened_chats = Object.keys(data["chats"][i]);
+        opened_chats.forEach( function(key) {
+          console.log(data["chats"][i][opened_chats]);
+          init_chats(data["chats"][i][opened_chats]);
+        })
+      }
+
+
+      //opened_chats.forEach( function(key) {
+      //  init_chats(data[opened_chats]);
+      //})
 
 
     }
   })
 };
-
-  append_chats()

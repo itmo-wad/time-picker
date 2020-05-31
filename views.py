@@ -198,7 +198,7 @@ def set_services(id = 0):
 			count = 0
 			for name_service in services_prices:
 				services_names.append(name_service)
-				summ_prices += services_prices[name_service]
+				summ_prices += int(services_prices[name_service])
 				count +=1
 
 			middle_price = summ_prices/count
@@ -281,7 +281,9 @@ def date_select(id = 0):
 			range_time = get_schedular.pop(0)
 			for selected in get_schedular:
 				data = selected.split("\t")
-				data.pop(0)#deleting empty('') item
+				print(data)
+				if data[0] == '':
+					data.pop(0)#deleting empty('') item
 				time = (int(data[1].split("-")[1])-int(data[1].split('-')[0]))
 				set_schedular[data[0]] = data[1]
 
@@ -422,11 +424,35 @@ def upload_file():
 	else:
 		return redirect ('/')
 
+#uses for return id from receiver
+@app.route('/chat_with', methods = ["POST", "GET"])
+def chat_with(receiver = None):
+	if 'username' in session:
+		if request.method == 'GET':
+			receiver_nick = request.args.get('receiver')
+			chat_id = mongodb_query.get_chat_id(session['username'], receiver_nick)
+			return redirect(url_for('messanger', id=chat_id))
+	if 'username' in session:
+		if request.method == 'POST':
+			return render_template('messanger.html', id = 0)
 
+#opens chat with selected id
 @app.route('/messanger', methods = ["POST", "GET"])
-def messanger():
-	return render_template('messanger.html')
+def messanger(id = 0):
+	if 'username' in session:
+		if request.method == 'GET':
+			chat_id = request.args.get('id')
+			return render_template('messanger.html',id = chat_id)
+	if 'username' in session:
+		if request.method == 'POST':
+			return render_template('messanger.html', id = 0)
 
+
+@app.route('/who_am_i', methods = ["POST"])
+def who_am_i():
+	if 'username' in session:
+		if request.method == 'POST':
+			return jsonify({'nick': session['username']})
 
 @app.route('/get_messages', methods = ["POST"])
 def get_messages(id = 0):
@@ -444,95 +470,24 @@ def get_new_messages(id = 0):
 	if 'username' in session:
 		if request.method == 'POST':
 			date = request.data.decode("utf-8").split(',')
-			print("LOOOK HERE")
-			print(date)
+			chat_id = request.args.get('id')
 			#db.messages.find({"chat_id":1, 'date': {'$lt': ISODate("2020-05-30T18:52:19.069Z"), '$gte': ISODate("2020-05-30T18:49:55.077Z")}},  { "_id": 0} )
-			request_time = datetime.strptime("2020-05-30T18:52:19.069Z", '%Y-%m-%dT%H:%M:%S.%fZ')
-			last_update_time = datetime.strptime("2020-05-30T18:49:55.077Z", '%Y-%m-%dT%H:%M:%S.%fZ')
-			print("____")
-			print(type(request_time.isoformat()))
-			print(request_time.isoformat())
-			new_messages = mongodb_query.get_new_messages(id, session['username'], request_time.isoformat(), last_update_time.isoformat())
-			print(new_messages)
-			if new_messages:
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-				print("____-________________________________")
-
-				input()
+			request_time = datetime.strptime(date[0], '%Y-%m-%dT%H:%M:%S.%fZ')#datetime(2020, 5, 31, 9, 5, 9, 902785)#"Sun May 30 2020 18:49:55 GMT+0300"#
+			last_update_time = datetime.strptime(date[1], '%Y-%m-%dT%H:%M:%S.%fZ')#datetime(2020, 5, 31, 9, 4, 25, 243362)#"Sun May 30 2020 18:52:19 GMT+0300"#
+			new_messages = mongodb_query.get_new_messages(chat_id, session['username'], request_time, last_update_time )
 
 			return jsonify({'new_msgs': new_messages})
 
 
+@app.route('/send_message', methods = ["POST"])
+def send_message(id = 0):
+	if 'username' in session:
+		if request.method == 'POST':
+			chat_id = request.args.get('id')
+			message = request.data.decode("utf-8")
+			date = datetime.utcnow()
+			mongodb_query.send_message(chat_id, session['username'], message, date)
+			return jsonify(success=True)
 
 
 
@@ -542,21 +497,23 @@ def chatlist():
 		if request.method == 'POST':
 			#go for mongo
 			chats = mongodb_query.get_list_chats(session['username'])
-			dict_messages = {}
+			list_of_dict = []
 			for chat in chats:#iterate through senders nicknames
-				print(chat)
+				dict_messages = {}
 				for nickname in chat["participants"]:
 					print (nickname)
 					if nickname != session['username']:
 						receiver = nickname
 						break
 				message = mongodb_query.get_last_message(session['username'], receiver)
-				print(type(message))
-				print(message)
-				del message['_id']
-				dict_messages[receiver] = message
-			print(dict_messages)
-			return jsonify(dict_messages)
+				if len(message) != 0:
+					print(message)
+					print(type(message))
+					del message[0]['_id']
+					dict_messages[receiver] = message[0]
+				list_of_dict.append(dict_messages)
+
+			return jsonify({"chats":list_of_dict})
 
 
 

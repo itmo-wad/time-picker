@@ -81,7 +81,7 @@ def create_service(login, service_name, addit_info, image):
 		#next_id = views.mongo.db.eval("getNextSequenceValue('productid')") #think it s not working with mlab
 		print("id")
 		#print(next_id)
-		id = 7 #vremenniy kostil
+		id = 8 #vremenniy kostil
 		views.mongo.db.services.insert({"_id":id, "username":login.lower(), "service_name": service_name, "addit_info": addit_info, "service_logo": base64.b64encode(image.read()).decode()})
 		return id
 
@@ -173,16 +173,16 @@ def get_list_chats(nickname):
 
 def get_last_message(sender, receiver):
 	chat_id = get_chat_id(sender, receiver)
-	message = list(views.mongo.db.messages.find({ "$query": {"chat_id":chat_id}, "$orderby": { "date" : -1 }}))[0]
+	message = list(views.mongo.db.messages.find({ "$query": {"chat_id":chat_id}, "$orderby": { "date" : -1 }}))
 
 	return message
 
 def get_chat_id(sender_nick, receiver_nick):
 	check = [sender_nick, receiver_nick]
 	check = sorted(check)
-	chat_exist = list(views.mongo.db.chats.find({"participants":check}))[0]
+	chat_exist = list(views.mongo.db.chats.find({"participants":check}))
 	if chat_exist:
-		return chat_exist["chat_id"]
+		return chat_exist[0]["chat_id"]
 	else:
 		#next_id = views.mongo.db.eval("getNextSequenceValue('chatID')") #think it s not working with mlab
 		print("id")
@@ -192,24 +192,21 @@ def get_chat_id(sender_nick, receiver_nick):
 		return chat_id
 
 
-def new_message(sender, receiver, message, date):
-	chat_id = get_chat_id(sender, receiver)
-	views.mongo.db.messages.insert({"sender":sender,"chat_id":chat_id, "message_body":message, "date":date})
+def send_message(chat_id, sender, message, date):
+	#chat_id = get_chat_id(sender, receiver)
+	views.mongo.db.messages.insert({"sender":sender,"chat_id":int(chat_id), "message_body":message, "date":date})
 
 
 
 def get_messages(chat_id):
-	print(chat_id)
-	messages = list(views.mongo.db.messages.find({"chat_id":chat_id}, { "_id": 0}))
-	print(type(messages))
-	print(messages)
-	print("done")
+	messages = list(views.mongo.db.messages.find({"chat_id":int(chat_id)}, { "_id": 0}))
 	return messages
 
 
 
 def get_new_messages(chat_id, username, start_time, end_time):
-    print(type(start_time))
-    #messages = list(views.mongo.db.messages.find({"chat_id":chat_id, 'date': {'$lt': {'$dateFromString': {'dateString': start_time}}, '$gte': {'$dateFromString': {'dateString': end_time}}}},  { "_id": 0} ))
-    messages = list(views.mongo.db.messages.find({"chat_id":chat_id, 'date': {'$lt': start_time, '$gte': end_time}},  { "_id": 0} ))
-    return messages
+	#messages = list(views.mongo.db.messages.find({"chat_id":chat_id, 'date': {'$lt': {'$dateFromString': {'dateString': start_time}}, '$gte': {'$dateFromString': {'dateString': end_time}}}},  { "_id": 0} ))
+	#messages = list(views.mongo.db.messages.find({'date': {'$gte': end_time}},  { "_id": 0} ))
+
+	messages = list(views.mongo.db.messages.find({"chat_id":int(chat_id), 'date': {'$lt': start_time, '$gte': end_time}},  { "_id": 0} ))
+	return messages

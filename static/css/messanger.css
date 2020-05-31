@@ -5,8 +5,11 @@ img{ max-width:100%;}
   float: left;
   overflow: hidden;
   width: 40%; border-right:1px solid #c4c4c4;
+  box-sizing: border-box;
 }
 .inbox_msg {
+  display: flex;
+  flex-wrap: wrap;
   border: 1px solid #c4c4c4;
   clear: both;
   overflow: hidden;
@@ -90,6 +93,7 @@ img{ max-width:100%;}
   float: left;
   padding: 30px 15px 0 25px;
   width: 60%;
+  box-sizing: border-box;
 }
 
  .sent_msg p {
