@@ -11,9 +11,12 @@
       margin: 10%;
     }
     .mapContainer {
-      width: 50vw;
-      height: 50vh;
+      display:none;
     }
+    .check {
+      visibility: hidden;
+    }
+
 
 
     </style>
@@ -52,7 +55,7 @@
        Step 3/4: Set up address, where you'll provide service.
      </div>
 
-  <div id="mapContainer"></div>
+  <div id="mapContainer" class="mapContainer"></div>
 
   <div class="fill_address">
     <form method = "POST" action="/set_address?id={{id}}">
@@ -82,8 +85,7 @@
     <button class="form-control" onclick="location.href = '/save_coordinate?id={{id}}&lt={{latitude}}&lg={{longitude}}'">Address is recognized excellent. Next step!</button>
     <button class="form-control" onclick="location.href = '/set_address?id={{id}}'">Map is not shown. Type address again.</button>
   <div>
-//todo add js: next step but and type again should be shown after check button and inputs hidden
-
+    
 
 
   <script>
@@ -95,6 +97,12 @@
 	const lng = {{longitude}};
 	const lat = {{latitude}};
   const id = {{id}};
+  console.log(lng);
+  if (lat != "59.9138" && lng != "30.3483") {
+    document.getElementsByClassName('check')[0].style.visibility = "visible";
+    document.getElementsByClassName('mapContainer')[0].style.display = "block";
+    document.getElementsByClassName('fill_address')[0].style.display = "none";
+}
 
 // Obtain the default map types from the platform object
 	var defaultLayers = platform.createDefaultLayers();
@@ -110,6 +118,7 @@ var map = new H.Map(
 
 	const marker = new H.map.Marker({lat: lat, lng: lng});
 	map.addObject(marker);
+
   </script>
   </body>
 </html>
