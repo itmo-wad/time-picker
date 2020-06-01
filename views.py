@@ -154,37 +154,55 @@ def settings_change_info():
 #creating new service
 #first page for add information about specialization
 @app.route('/create_service', methods = ['GET', 'POST'])
-def create_service():
+def create_service(idc = 0):
 	if request.method == "GET":
 		if 'username' in session:
-			return render_template("service_create_specialization.html")
+			idc = request.args.get('idc')
+			if idc != None:
+				return render_template("service_create_specialization.html")
+			else:
+				#todo check if service belongs username
+				return render_template("service_create_specialization.html", idc = idc)
 
 		else:
 			return render_template('login_page.html')
 	#saves information and turns to next step
 	if request.method == "POST":
 		if 'username' in session:
+			idc = request.args.get('idc')
 			name_service = request.form['service_name']
 			additional_information = request.form['service_descr']
 			service_image = request.files['service_image']
-			id = mongodb_query.create_service(session['username'], name_service, additional_information, service_image)
-			#save information to DB
-			#next page | map select
-			#sending ID throught the each page of service registration
-			#return redirect(url_for('set_address', id=id, lt=latitude,lg=longitude))
-			return redirect(url_for('set_services', id=id))
-			#return render_template('map.html',apikey=maps_api_key, id=id, latitude=latitude,longitude=longitude)#map.html is my HTML file name
+			if idc != None:
+				print(idc)
+				mongodb_query.change_service(idc, session['username'], name_service, additional_information, service_image)
+				return redirect(url_for('created_services'))
+
+			else:
+				id = mongodb_query.create_service(session['username'], name_service, additional_information, service_image)
+				#save information to DB
+				#next page | map select
+				#sending ID throught the each page of service registration
+				if id != -1:
+					return redirect(url_for('set_services', id=id))
+				else:
+					print("service already registered todo")
+					return redirect(url_for('mainpage'))
 		else:
 			render_template("login_page.html")
 
 #creating new service
 #second page for add services that could be done by master
 @app.route('/set_services', methods = ['GET', 'POST'])
-def set_services(id = 0):
+def set_services(id = 0, idc = 0):
 	if request.method == "GET":
 		if 'username' in session:
-			id = request.args.get('id')
-			return render_template("service_create_services.html", id=id)
+			ids = request.args.get('ids')
+			if ids != 0:
+				id = request.args.get('id')
+				return render_template("service_create_services.html", id=id)
+			else:
+				return render_template("service_create_services.html", ids=ids)
 		else:
 			render_template("login_page.html")
 
@@ -220,10 +238,11 @@ def set_address(id=0, lt = 59.9138, lg = 30.3483):
 	#showing updated map
 	if request.method == "GET":
 		if 'username' in session:
-			id = request.args.get('id')
-			lat = request.args.get('lt')
-			long = request.args.get('lg')
-			return render_template('service_create_map.html',apikey=maps_api_key, id=id, latitude=lat,longitude=long)#map.html is my HTML file name
+				id = request.args.get('id')
+				print(id)
+				lat = request.args.get('lt')
+				long = request.args.get('lg')
+				return render_template('service_create_map.html',apikey=maps_api_key, id=id, latitude=lat,longitude=long)#map.html is my HTML file name
 
 		else:
 			return render_template('login_page.html')
@@ -249,6 +268,7 @@ def set_address(id=0, lt = 59.9138, lg = 30.3483):
 def save_coordinate(id = 0, lt=0, lg=0):
 	if request.method == "GET":
 		if 'username' in session:
+			#todo continue
 			#save coordinates to DB
 			id = request.args.get('id')
 			lat = request.args.get('lt')

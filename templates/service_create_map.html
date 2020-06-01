@@ -85,7 +85,7 @@
     <button class="form-control" onclick="location.href = '/save_coordinate?id={{id}}&lt={{latitude}}&lg={{longitude}}'">Address is recognized excellent. Next step!</button>
     <button class="form-control" onclick="location.href = '/set_address?id={{id}}'">Map is not shown. Type address again.</button>
   <div>
-    
+
 
 
   <script>
@@ -97,6 +97,7 @@
 	const lng = {{longitude}};
 	const lat = {{latitude}};
   const id = {{id}};
+  console.log(id);
   console.log(lng);
   if (lat != "59.9138" && lng != "30.3483") {
     document.getElementsByClassName('check')[0].style.visibility = "visible";

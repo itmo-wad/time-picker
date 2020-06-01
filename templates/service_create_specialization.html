@@ -79,7 +79,7 @@
       <label class="custom-file-label" for="inputGroupFile02" id='imglabel'>Set Image for service</label>
     </div>
 
-    <button type="button" class="form-control" onclick=sendData()>Next</button>
+    <button type="button" class="form-control" id = "send_but" onclick=sendData()>Next</button>
 
 
 
@@ -89,6 +89,8 @@
 
 </body >
 
+
+
  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
@@ -96,6 +98,36 @@
 
 	<script type="text/javascript">
 
+
+
+
+	var idc = getUrlParam('idc','Empty');
+
+
+	function getUrlParam(parameter, defaultvalue){
+	    var urlparameter = defaultvalue;
+	    if(window.location.href.indexOf(parameter) > -1){
+	        urlparameter = getUrlVars()[parameter];
+	        }
+	    return urlparameter;
+	};
+
+	function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
+	}
+
+
+	if (idc != "Empty") {
+		var button = document.getElementById('send_but');
+		button.innerText ="Change data";
+		console.log("changed");
+		button.setAttribute("onclick", "changeData("+idc+")")
+
+	}
 	var previewImg = function(event) {
 		var preview = document.getElementById('preview');
 		var imgText = document.getElementById('imglabel');
@@ -131,6 +163,33 @@
 	    });
 	}
 
+
+	async function changeData(id){
+		let serviceName = document.getElementById('serviceName').value;
+		let serviceDescription = document.getElementById('additional_information').value;
+		let image = document.getElementById('inputImage').files[0];
+		console.log(image);
+		var data = new FormData();
+		data.append('service_name', serviceName);
+		data.append('service_descr', serviceDescription);
+		data.append('service_image', image);
+		console.log(data);
+		let response = await fetch('http://' + document.domain + ':' + location.port+'/create_service?idc='+id,{
+					method: 'POST',
+					redirect: 'follow',
+					body: data
+				})
+				.then(response => {
+					// HTTP 301 response
+					// HOW CAN I FOLLOW THE HTTP REDIRECT RESPONSE?
+					console.log(response)
+					if (response.redirected) {
+							window.location.href = response.url;
+					}
+			});
+	}
+
+//todo implement filling inputs with old information
 
 	</script>
 </html>

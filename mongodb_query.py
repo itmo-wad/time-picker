@@ -76,14 +76,19 @@ def create_service(login, service_name, addit_info, image):
 	if service_exsist:
 		print("#TODO service already registered with this login and service name")
 		id = list(views.mongo.db.services.find({"username":login.lower(), "service_name": service_name}).limit(1))[0]
+		id = -1
 		return id
 	else:
 		#next_id = views.mongo.db.eval("getNextSequenceValue('productid')") #think it s not working with mlab
 		print("id")
 		#print(next_id)
-		id = 9 #vremenniy kostil
+		id = 10 #vremenniy kostil
 		views.mongo.db.services.insert({"_id":id, "username":login.lower(), "service_name": service_name, "addit_info": addit_info, "service_logo": base64.b64encode(image.read()).decode()})
 		return id
+
+def change_service(idc, username, name_service, addit_info, service_image):
+	#query is not working
+	views.mongo.db.services.update({"_id":idc, "username":username.lower()}, {"_id":idc, "username":username.lower(), "service_name": name_service, "addit_info": addit_info, "service_logo": base64.b64encode(service_image.read()).decode()})
 
 def set_services(id, login, services_names, services_prices, middle_price):
 		#TODO: check if cant do int(id)?
@@ -213,5 +218,5 @@ def get_new_messages(chat_id, username, start_time, end_time):
 
 
 def get_services(username):
-    services = list(views.mongo.db.services.find({"username":username }))
-    return services
+	services = list(views.mongo.db.services.find({"username":username }))
+	return services
