@@ -173,7 +173,7 @@
 
     let card = document.createElement('div');
     card.className = 'card mb-3';
-    card.style = "max-width: 540px;"
+    card.style = "max-width: 100%;"
 
     let cardInside = document.createElement('div');
     cardInside.className = 'row no-gutters';
@@ -194,17 +194,21 @@
     let title = document.createElement('h5');
     title.innerText = task.service_name;
     title.className = 'card-title';
+    title.style.margin = "5%";
 
     let description = document.createElement('p');
     description.innerText = task.addit_info;
     description.className = 'card-text';
+    description.style.margin = "5%";
 
     let master_name = document.createElement('p');
     master_name.innerText = task.username;
     master_name.className = 'card-text';
+    master_name.style.margin = "5%";
 
     let destination = document.createElement('p');
     destination.className = 'card-text';
+    destination.style.margin = "5%";
 
     let destinationInside = document.createElement('small');
     destinationInside.innerText = "Coordinates lt: "+task.lt;
@@ -212,6 +216,7 @@
 
     let middle_price = document.createElement('p');
     middle_price.className = 'card-text';
+    middle_price.style.margin = "5%";
 
     let middle_priceInside = document.createElement('small');
     middle_priceInside.innerText = 'Middle price: '+task.middle_price;
