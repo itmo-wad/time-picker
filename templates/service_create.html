@@ -130,7 +130,7 @@
 								<div class="form-group">
 									<label>Select work start time</label>
 									<div class="input-group date" id="datetimepicker2" data-target-input="nearest">
-										<input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker2"/>
+										<input type="text" class="form-control datetimepicker-input" id = "start_time" data-target="#datetimepicker2"/>
 										<div class="input-group-append" data-target="#datetimepicker2" data-toggle="datetimepicker">
 											<div class="input-group-text"><i class="fa fa-clock-o"></i></div>
 										</div>
@@ -139,7 +139,7 @@
 								<div class="form-group">
 									<label>Select work end time</label>
 									<div class="input-group date" id="datetimepicker3" data-target-input="nearest">
-										<input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker3"/>
+										<input type="text" class="form-control datetimepicker-input" id = "end_time" data-target="#datetimepicker3"/>
 										<div class="input-group-append" data-target="#datetimepicker3" data-toggle="datetimepicker">
 											<div class="input-group-text"><i class="fa fa-clock-o"></i></div>
 										</div>
@@ -148,14 +148,23 @@
 								<div class="form-group">
 									<label>How much time it lasts</label>
 									<div class="input-group">
-										<input type="text" class="form-control"/>
+										<input id="range_time" type="text" class="form-control"/>
 									</div>
 								</div>
 							</div>
 						</div>
 						<div class="ml-5">
 							<span>Here generated timeslots</span>
+							<div>
+								<button type="button" name="button" class="btn btn-outline-secondary btn-block" id = "pick_slot_but" onclick="showslots()">I don't work 24 hours.</button>
+							</div>
+							<div id="timeslots"></div>
 						</div>
+
+						<div>
+							<button type="button" name="button" class="btn btn-outline-secondary btn-block"  onclick="saveWorkHours()" style="display:block;">Save my work hours</button>
+						</div>
+
 					</div>
 					<div class="d-flex">
 						<button class="btn btn-lg btn-secondary btn-block btnPrevious mt-3 mr-1 text-uppercase" type="button"><< PREVIOUS STEP</button>
