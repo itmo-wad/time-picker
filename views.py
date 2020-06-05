@@ -2,8 +2,8 @@
 
 import os
 #import json
-#import base64
-#import requests
+import base64
+import requests
 from PIL import Image 				# To resize image
 import secrets
 import mongodb_query
@@ -11,14 +11,22 @@ from app import app, mongo
 from forms import RegistrationForm, LoginForm, UpdateAccountForm, CreateServiceForm
 #from datetime import datetime
 from flask_login import login_user, logout_user, current_user, login_required
-from flask import Flask, send_from_directory, request, flash, redirect, render_template, url_for
+from flask import Flask, send_from_directory, request, flash, redirect, render_template, url_for, jsonify
 
 
 maps_URL = "https://geocode.search.hereapi.com/v1/geocode"
+maps_image_URL = "https://image.maps.ls.hereapi.com/mia/1.6/mapview"
 maps_api_key = app.config["MAPS_API"]
-PARAMS = {'apikey':maps_api_key,'q':"Невский проспект"}#default address
+get_coords_params = {'apikey':maps_api_key,'q':"Невский проспект"}#default address
+#z params for zoom image
+#w for request width image
 latitude = 59.9138
 longitude = 30.3483
+get_image_params = {'c': str(latitude)+','+str(longitude), 'z':'16', 'w':"500", 'apiKey':maps_api_key} #example default params for requst img
+
+
+
+
 
 
 services = [
@@ -202,6 +210,37 @@ def test_create():
 
 
 
+
+@app.route('/get_address_image', methods = ['POST'])
+@login_required
+def get_address_image():
+	#showing updated map
+	if current_user.is_authenticated:
+		if request.method == "POST":
+			#address used for request url to get coords
+			address = request.form['city']+' '+request.form['street']+' '+request.form['building_num']
+			#width used to requst image with the same width
+			user_screen_width = request.form['width']
+			get_coords_params['q'] = address
+
+			r = requests.get(url = maps_URL, params = get_coords_params)
+			data = r.json()
+			latitude = data['items'][0]['position']['lat']
+			longitude = data['items'][0]['position']['lng']
+			get_image_params['c'] = str(latitude)+','+str(longitude)
+			get_image_params['z'] = "16"#scale image
+			get_image_params['apiKey'] = maps_api_key
+			get_image_params['w'] = user_screen_width
+			image = requests.get(url = maps_image_URL, params = get_image_params)
+			print(image)
+
+
+			return jsonify({"image": base64.b64encode(image.content).decode()})
+
+
+
+
+
 # #setting page allow to upload avatar
 # #			  redir to change password
 # #					to change name,surname,phone_num
@@ -371,9 +410,9 @@ def set_address(id=0, lt = 59.9138, lg = 30.3483):
 		if 'username' in session:
 			id = request.args.get('id')
 			address = request.form['city']+' '+request.form['street']+' '+request.form['building_number']
-			PARAMS['q'] = address
+			get_coords_params['q'] = address
 			# sending get request and saving the response as response object
-			r = requests.get(url = maps_URL, params = PARAMS)
+			r = requests.get(url = maps_URL, params = get_coords_params)
 			data = r.json()
 			latitude = data['items'][0]['position']['lat']
 			longitude = data['items'][0]['position']['lng']
@@ -725,6 +764,3 @@ def chatlist():
 # 		else:
 # 			flash("This username is already in use. Please try another one")
 # 			return render_template('register_page.html')
-
-
-

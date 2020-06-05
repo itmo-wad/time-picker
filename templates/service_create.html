@@ -75,38 +75,35 @@
 						<p class="lead">Set up address, where you'll provide service.</p>
 					</div>
 
+					<div id="mapContainer" class="mapContainer"></div>
+
 					<div class="fill_address">
-						<div class="input-group mb-3">
-							<div class="input-group-prepend">
-								<span class="input-group-text" id="">City</span>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="">City</span>
+								</div>
+								<input class="form-control" type="text" id="city" placeholder="Hint: Saint-Petersburg"  required>
 							</div>
-							<input class="form-control" type="text" name="city" placeholder="Hint: Saint-Petersburg" required>
-						</div>
-
-						<div class="input-group mb-3">
-							<div class="input-group-prepend">
-								<span class="input-group-text">Street</span>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text">Street</span>
+								</div>
+								<input class="form-control" type="text" id="street" placeholder="Hint: Nevskiy prospect"  required></input>
 							</div>
-							<input class="form-control" type="text" name="street" placeholder="Hint: Nevskiy prospect" required>
-						</div>
-
-						<div class="input-group mb-3">
-							<div class="input-group-prepend">
-								<span class="input-group-text">Building number</span>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text">Building number</span>
+								</div>
+								<input class="form-control" type="text" id="building_num" placeholder="Hint: 16"  required></input>
 							</div>
-							<input class="form-control" type="text" name="building_number" placeholder="Hint: 16" required>
-						</div>
-      					<button class="btn btn-secondary form-control mb-3" type="button">Check address on map</button>
+							<button type="button" class="form-control" onclick="sendLocation()">Show address on map.</button>
 					</div>
-					
 
-<div class = "check">
-<button type="button" class="form-control" onclick="location.href = '/save_coordinate?id={{id}}&lt={{latitude}}&lg={{longitude}}'">Address is recognized excellent. Next step!</button>
-<button type="button" class="form-control" onclick="location.href = '/set_address?id={{id}}'">Map is not shown. Type address again.</button>
-<div>
-<div id="mapContainer" class="mapContainer"></div>
-</div>
-</div>
+					<div class = "check" style="display:none;">
+						<button type="button" class="form-control" onclick="hideMap()">Map is not shown. Type address again.</button>
+					</div>
+
+					<div id='width'></div>
 
 					<div class="d-flex">
 						<button class="btn btn-lg btn-secondary btn-block btnPrevious mt-3 mr-1 text-uppercase" type="button"><< PREVIOUS STEP</button>

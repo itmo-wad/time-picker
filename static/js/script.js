@@ -24,11 +24,11 @@ $("#inputImage").change(function() {
 function readURL(input) {
   if (input.files && input.files[0]) {
     var reader = new FileReader();
-    
+
     reader.onload = function(e) {
       $('#img-upload').attr('src', e.target.result);
     }
-    
+
     reader.readAsDataURL(input.files[0]); // convert to base64 string
   }
 }
@@ -104,6 +104,51 @@ function createNewService(id) {
 
 // Step 3
 // Map code and all
+function showMap() {
+    document.getElementsByClassName('check')[0].style.display = "block";
+    document.getElementsByClassName('mapContainer')[0].style.display = "block";
+    document.getElementsByClassName('fill_address')[0].style.display = "none";
+}
+function hideMap(){
+  //removing old img
+  img = document.getElementById("map_image");
+  img.parentNode.removeChild(img);
+
+  document.getElementsByClassName('check')[0].style.display = "none";
+  document.getElementsByClassName('mapContainer')[0].style.display = "none";
+  document.getElementsByClassName('fill_address')[0].style.display = "block";
+}
 
 
+  async function sendLocation(){
+  let city = document.getElementById('city').value;
+  let street = document.getElementById('street').value;
+  let building_num = document.getElementById('building_num').value;
+  var width = document.getElementById('width').offsetWidth;
+  var data = new FormData();
+  data.append('city', city);
+  data.append('street', street);
+  data.append('building_num', building_num);
+  data.append('width', width)
+  let response = await fetch('http://' + document.domain + ':5000/get_address_image',{
+        method: 'POST',
+        body: data
+      })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data.message);
+        if (data.message != '200OK') {
+          console.log(data["image"]);
+          var divimage = document.getElementById('mapContainer');
 
+          let imgsrc = document.createElement("img");
+          imgsrc.id = "map_image"
+          imgsrc.src = 'data:image/png;base64, '+data["image"];
+
+          divimage.appendChild(imgsrc);
+          showMap();
+
+        }});
+      }
