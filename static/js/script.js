@@ -10,6 +10,7 @@ $('.btnPrevious').click(function(){
 // Step 1
 // Service picture upload
 // the name of the file appear on select
+var service_image;
 $(".custom-file-input").on("change", function() {
 	var fileName = $(this).val().split("\\").pop();
 	$(this).siblings(".custom-file-label").addClass("selected").html(fileName);
@@ -28,10 +29,13 @@ function readURL(input) {
     reader.onload = function(e) {
       $('#img-upload').attr('src', e.target.result);
     }
-
     reader.readAsDataURL(input.files[0]); // convert to base64 string
   }
 }
+
+
+
+
 
 
 // Step 2
@@ -101,9 +105,26 @@ function createNewService(id) {
 		}
 	}
 
+//func return values to save
+function get_services_prices () {
+	var inputs = document.getElementsByTagName("input");
+		var data = {};
+		for (var i = 0; i<inputs.length; i++) {
+			if (inputs[i].id == "filled_name") {
+				data[inputs[i].value] = inputs[i+1].value
+			}
+		}
+	return data
+}
+
+
+
 
 // Step 3
 // Map code and all
+
+//to save
+var coords = "0";
 function showMap() {
     document.getElementsByClassName('check')[0].style.display = "block";
     document.getElementsByClassName('mapContainer')[0].style.display = "block";
@@ -148,7 +169,7 @@ function hideMap(){
           imgsrc.src = 'data:image/png;base64, '+data["image"];
 
 					//!to save
-					console.log(data["coords"]);
+					coords = data["coords"];
 
           divimage.appendChild(imgsrc);
           showMap();
@@ -162,16 +183,36 @@ function hideMap(){
 
 function init_timeslots(time_slot) {
 
-	let button_slot = document.createElement('button');
-	button_slot.className = "btn btn-outline-secondary btn-block"
-	button_slot.innerText = time_slot;
-	button_slot.id = "not_selected"
+	//check for right format of time
+	var start_time = time_slot.split("-")[0]
+	var hours_start = plus_zero(start_time.split(":")[0])
+	var minutes_start = plus_zero(start_time.split(":")[1])
+
+	var end_time = time_slot.split("-")[1]
+	var hours_end = plus_zero(end_time.split(":")[0])
+	var minutes_end = plus_zero(end_time.split(":")[1])
+
+
+
+	let button_slot = document.createElement('div');
+	button_slot.className = "alert alert-secondary";
+	button_slot.innerText = hours_start+":"+minutes_start+"-"+hours_end+":"+minutes_end;
 
 	var divslot = document.getElementById("timeslots");
 
 	divslot.appendChild(button_slot);
 }
 
+function plus_zero(num) {
+	if (parseInt(num)<10) {
+		//kostil
+		if (num != "00") {
+		num = "0"+num;
+		}
+	}
+	console.log(num);
+	return num;
+}
 
 function showslots() {
 
@@ -221,6 +262,7 @@ function showslots() {
 			end_hour_slot += 1;
 			end_hour_slot += parseInt(range_hour);
 
+
 			time_slot = start_hour+":"+start_minutes+"-"+end_hour_slot.toString()+":"+end_minute_slot.toString();
 
 			init_timeslots(time_slot);
@@ -230,6 +272,7 @@ function showslots() {
 			start_minutes = end_minute_slot.toString();
 		} else {
 			end_hour_slot += parseInt(range_hour);
+
 
 			time_slot = start_hour+":"+start_minutes+"-"+end_hour_slot.toString()+":"+end_minute_slot.toString();
 
@@ -244,18 +287,52 @@ function showslots() {
 }
 
 
-function select_time(selected_time){
-	console.log(selected_time.textContent);
-	if (selected_time.id == "not_selected"){
-		selected_time.id = "selected";
-		selected_time.className = "btn btn-outline-success";
-	} else {
-		selected_time.id = "not_selected";
-		selected_time.className = "btn btn-outline-secondary btn-block";
+//to send from 4/4
+var dates = {}
+function saveWorkHours(){
+	//todo check for filling all
+	var work_hours = document.getElementById("timeslots").childNodes;
+	var list_work_hours = []
+	for (var i=0; i<work_hours.length; i++){
+		list_work_hours.push(work_hours[i].innerText);
 	}
+	var day = document.getElementsByClassName("day active");
+	var month = document.getElementsByClassName("picker-switch");
+	dates[day[0].innerText+" "+month[0].innerText] = list_work_hours
+
+	console.log(dates);
 }
 
-function saveWorkHours(){
-	console.log("saving");
-	var work_hours = document.getElementById("timeslots")
-}
+
+//from 1 step
+
+//service_image
+
+//sending data func
+var all_service_data = {}
+async function register_service() {
+
+	all_service_data["service_name"] = document.getElementById("serviceName").value;
+	all_service_data["addit_info"] = document.getElementById("additional_information").value;
+	all_service_data["service_image"] = document.getElementById("img-upload").src.split("base64,/")[1];
+	all_service_data["services_prices"] = get_services_prices();
+	all_service_data["coords"] = coords;
+	all_service_data["dates"] = dates;
+	console.log(all_service_data);
+
+	url = 'http://' + document.domain + ':' + location.port+'/check_data';
+  let request_register_service = await fetch(url,{
+    method: 'POST',
+    headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+            },
+    body: JSON.stringify(all_service_data)
+  })
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    if (data.message != '200OK') {
+      console.log(data);
+    }})
+};

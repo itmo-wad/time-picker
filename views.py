@@ -235,7 +235,7 @@ def get_address_image():
 			print(image)
 
 
-			return jsonify({"image": base64.b64encode(image.content).decode()})
+			return jsonify({"image": base64.b64encode(image.content).decode(), "coords"=str(latitude)+','+str(longitude)})
 
 
 
@@ -689,6 +689,15 @@ def chatlist():
 
 # ==========================================================================================
 # All functions for testing will be placed BELOW
+
+#check_data
+@app.route('/check_data', methods = ["POST"])
+def check_data():
+	if current_user.is_authenticated:
+		if request.method == 'POST':
+			information = request.data.decode("utf-8")
+			print(information)
+			return jsonify(success=True)
 
 # #it used just for testing to see each registered user
 # @app.route('/showregistered', methods = ['GET','POST'])
