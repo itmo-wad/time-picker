@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section" style="margin-left: 10%; margin-right: 10%;">
+	<h3 class="card-title">Your services</h3>
+	<hr>
+	<div class="row d-flex justify-content-between">
+		{% if services %}
+			{% for service in services %}
+				<div class="card col-auto mb-3" style="max-width: 540px;">
+					<div class="row no-gutters">
+						<div class="card-body col-4">
+							<img src="{{ url_for('static', filename=logo_folder+service['service_logo']) }}" class="card-img" alt="...">
+						</div>
+						<div class="col-8">
+							<div class="card-body">
+								<h5 class="card-title">{{ service['service_name'] }}</h5>
+								<p class="card-text">{{ service['additional_info'] }}</p>
+								<p class="card-text">Master: {{ service['master_name'] }}</p>
+								<p class="card-text"><small class="text-muted">Distance from you: 1.5 km.</small></p>
+								<p class="card-text"><small class="text-muted">Middle price: 1$</small></p>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		{% else %}
+			<div class="card-body">
+				<h5 class="card-title">Seems like you didn't create any services yet!</h5>
+			</div>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}

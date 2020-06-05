@@ -1,15 +1,17 @@
 """ Views file """
 
 import os
-import json
-import base64
-import requests
+#import json
+#import base64
+#import requests
+from PIL import Image 				# To resize image
+import secrets
 import mongodb_query
 from app import app, mongo
-from datetime import datetime
-from flask import Flask, send_from_directory, request, flash, redirect, render_template, session, url_for, jsonify
-
-
+from forms import RegistrationForm, LoginForm, UpdateAccountForm, CreateServiceForm
+#from datetime import datetime
+from flask_login import login_user, logout_user, current_user, login_required
+from flask import Flask, send_from_directory, request, flash, redirect, render_template, url_for
 
 
 maps_URL = "https://geocode.search.hereapi.com/v1/geocode"
@@ -19,137 +21,254 @@ latitude = 59.9138
 longitude = 30.3483
 
 
-#redirects to mainpage if logged in
-#else - login
-@app.route('/', methods = ['GET','POST'])
-def login():
-	if request.method == "POST":
-		if mongodb_query.user_exist(request.form['username'], request.form['password']):
-			session['username'] = request.form['username']
-			return redirect('mainpage')
-		else:
-			flash("Wrong login or password!")
-			return render_template('login_page.html')
-	elif request.method == "GET":
-		if 'username' in session:
-			return redirect(url_for("mainpage"))
-	return render_template('login_page.html')
+services = [
+{
+	"owner": "user",
+	"master_name": "Elena Sergeevna Sokolova",
+	"service_name": "Barbershop666",
+	"additional_info": "I'm the best in this. I want to became a famous barber and now i'm looking for my regular clints, that's why price so little.",
+	"service_logo": "default.jpeg" },
+{
+	"owner": "user",
+	"master_name": "Elena Sergeevna Sokolova",
+	"service_name": "Barbershop666",
+	"additional_info": "I'm the best in this. I want to became a famous barber and now i'm looking for my regular clints, that's why price so little.",
+	"service_logo": "default.jpeg" },
+]
 
 
-#main page
-@app.route('/mainpage')
-def mainpage():
-	if request.method == "GET":
-		if 'username' in session:
-			userdata = mongodb_query.showUser_info(session['username'])
-			name = userdata[0]["surname"]+" "+userdata[0]["name"]
-			try:
-				avatar =  mongo.db.users_table.find_one({'username':session['username']})['avatar']
-				return render_template('main_info.html', name = name, image=avatar, phone_num = userdata[0]["phone_number"])
-			except KeyError:
-				return render_template('main_info.html', name = name, phone_num = userdata[0]["phone_number"])
-		else:
-			return redirect ('/')
-
-
-#it used just for testing to see each registered user
-@app.route('/showregistered', methods = ['GET','POST'])
-def showregistered():
-	if 'username' in session:
-		userdata = mongodb_query.showUser_info(session['username'])
-		try:
-			avatar =  mongo.db.users_table.find_one({'username':session['username']})['avatar']
-			return render_template("setting_page.html", login = userdata[0]["login"], name = userdata[0]["name"], surname = userdata[0]["surname"], phone_num = userdata[0]["phone_number"], image=avatar, users = mongodb_query.showAllusers_table())
-		except KeyError:
-			return render_template("setting_page.html", login = userdata[0]["username"], name = userdata[0]["name"], surname = userdata[0]["surname"], phone_num = userdata[0]["phone_number"], users = mongodb_query.showAllusers_table())
-	else:
-		return render_template('register_page.html')
-
-
-
-
-@app.route('/register', methods = ['GET','POST'])
+# Register new user page
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-	if request.method == "GET":
-		if 'username' in session:
-			return redirect(url_for("mainpage"))
+	if current_user.is_authenticated:
+		return redirect(url_for('mainpage'))
+	form = RegistrationForm()
+	if form.validate_on_submit():
+		# hash the password, add user to DB
+		#hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+		if mongodb_query.create_user(form.username.data, form.password.data, form.name.data, form.surname.data, form.phone_number.data):
+			flash('Account was successfully created!', 'success')
+			return redirect(url_for('login'))
 		else:
-			return render_template('register_page.html')
-	elif request.method == "POST":
-		if mongodb_query.create_user(request.form['username'], request.form['password'], request.form['name'], request.form['surname'], request.form['phone_number']):
-			return redirect ('mainpage')
+			flash('This username is already taken. Please try another one.', 'danger')
+	return render_template('register.html', title='Register', form=form)
+
+
+# Login page
+@app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+	if current_user.is_authenticated:
+		return redirect(url_for('mainpage'))
+	form = LoginForm()
+	if form.validate_on_submit():
+		# TODO:
+		if mongodb_query.user_exists(form.username.data) and mongodb_query.user_credentials(form.username.data, form.password.data):
+			# Create session for this user
+			user = mongodb_query.User(list(mongo.db.users_table.find({"username": form.username.data}).limit(1))[0])
+			login_user(user, remember=form.remember.data)
+			next_page = request.args.get('next')
+			return redirect(next_page) if next_page else redirect(url_for('mainpage'))
 		else:
-			flash("This username is already in use. Please try another one")
-			return render_template('register_page.html')
+			flash('Incorrect login or password!', 'danger')
+	return render_template('login.html', title='Login', form=form)
 
 
-
+# Logout
 @app.route('/logout')
+@login_required
 def logout():
-	session.pop('username', None)
-	return redirect ('/')
+	logout_user()
+	flash('You were successfully logged out!', 'info')
+	return redirect(url_for('login'))
+
+
+# Main app page
+@app.route('/mainpage')
+@login_required
+def mainpage():
+	return render_template('mainpage.html')
 
 
 
 
-@app.route('/changepass', methods = ['GET','POST'])
-def changepass():
-	if request.method == "POST":
-		if 'username' in session:
-			if request.form['new_password'] == request.form['new_password2']:
-				if mongodb_query.change_pass(session['username'], request.form['old_password'], request.form['new_password']):
-					flash("Password successfuly canged")
-					return redirect(url_for("mainpage"))
-				else:
-					flash("Wrong old password")
-					return render_template('changepass_page.html')
-			else:
-				flash("Passwords should be the same")
-				return render_template('changepass_page.html')
-	if request.method == "GET":
-		if 'username' in session:
-			return render_template('changepass_page.html')
+# # Main app page
+# @app.route('/mainpage')
+# @login_required
+# def mainpage():
+# 	userdata = mongodb_query.showUser_info(current_user.username)
+# 	name = userdata[0]["surname"] + " " + userdata[0]["name"]
+# 	try:
+# 		avatar = mongo.db.users_table.find_one({'username': current_user.username})['avatar']
+# 		return render_template('main_info.html', name=name, image=avatar, phone_num=userdata[0]["phone_number"])
+# 	except KeyError:
+# 		return render_template('main_info.html', name=name, phone_num=userdata[0]["phone_number"])
+
+
+# Save picture to filesystem
+def save_picture(form_picture, out_size, folder):
+	# Create random name for profile picture
+	random_hex = secrets.token_hex(8)
+	f_name, f_ext = os.path.splitext(form_picture.filename)
+	picture_filename = random_hex + f_ext
+	picture_path = os.path.join(app.root_path, 'static/content/', folder, picture_filename)
+	output_size = (out_size, out_size)
+	i = Image.open(form_picture)
+	i.thumbnail(output_size)
+	i.save(picture_path)
+	return picture_filename
+
+
+# User settings page
+@app.route('/account_info', methods=['GET', 'POST'])
+@login_required
+def account_info():
+	form = UpdateAccountForm()
+	if form.validate_on_submit():
+		if form.profile_pic.data:
+			profile_pic_file = save_picture(form.profile_pic.data, 125, 'profile_pics')
+			current_user.profile_pic = profile_pic_file
+			mongodb_query.profile_pic_update(current_user.username, current_user.profile_pic)
+		# kostyl iz-za mongodb
+		current_user.name = form.name.data
+		current_user.surname = form.surname.data
+		current_user.phone_number = form.phone_number.data
+		if mongodb_query.user_update(current_user.username, current_user.name, current_user.surname, current_user.phone_number):
+			flash('Your data has been updated!', 'success')
+			return redirect(url_for('account_info'))
 		else:
-			return redirect ('/')
+			flash('Something went wrong!', 'warning')
+			return redirect(url_for('account_info'))
+	elif request.method == 'GET':
+		form.name.data = current_user.name
+		form.surname.data = current_user.surname
+		form.phone_number.data = current_user.phone_number
+	avatar_img = url_for('static', filename='content/profile_pics/' + current_user.profile_pic)
+	return render_template('account_info.html', title='Account info', avatar_img=avatar_img, form=form)
 
 
 
-#setting page allow to upload avatar
-#			  redir to change password
-#					to change name,surname,phone_num
-@app.route('/settings', methods = ['GET'])
-def settings():
-	if request.method == "GET":
-		if 'username' in session:
-			userdata = mongodb_query.showUser_info(session['username'])[0]
-			try:
-				avatar =  mongo.db.users_table.find_one({'username':session['username']})['avatar']
-				return render_template("setting_page.html", login = userdata["username"], name = userdata["name"], surname = userdata["surname"], phone_num = userdata["phone_number"], image=avatar)
-			except KeyError:
-				return render_template("setting_page.html", login = userdata["username"], name = userdata["name"], surname = userdata["surname"], phone_num = userdata["phone_number"])
-		else:
-			return render_template('register_page.html')
+
+# @app.route('/changepass', methods = ['GET','POST'])
+# def changepass():
+# 	if request.method == "POST":
+# 		if 'username' in session:
+# 			if request.form['new_password'] == request.form['new_password2']:
+# 				if mongodb_query.change_pass(session['username'], request.form['old_password'], request.form['new_password']):
+# 					flash("Password successfuly canged")
+# 					return redirect(url_for("mainpage"))
+# 				else:
+# 					flash("Wrong old password")
+# 					return render_template('changepass_page.html')
+# 			else:
+# 				flash("Passwords should be the same")
+# 				return render_template('changepass_page.html')
+# 	if request.method == "GET":
+# 		if 'username' in session:
+# 			return render_template('changepass_page.html')
+# 		else:
+# 			return redirect ('/')
 
 
-#allows to change name,surname
-@app.route('/settings_change', methods = ['GET', 'POST'])
-def settings_change_info():
-	if request.method == "GET":
-		if 'username' in session:
-			userdata = mongodb_query.showUser_info(session['username'])[0]
-			return render_template("settings_change.html", name = userdata["name"], surname = userdata["surname"], phone_num = userdata["phone_number"])
-		else:
-			return render_template('login_page.html')
 
-	if request.method == "POST":
-		if 'username' in session:
-			userdata = mongodb_query.showUser_info(session['username'])[0]
-			if mongodb_query.change_info(session['username'], request.form['name'], request.form['surname'], request.form['phone_number']):
-				flash("information successfuly changed")
-				return redirect(url_for("settings_change_info"))
-			else:
-				flash("something goes wrong, try again")
-				return redirect(url_for("settings_change_info"))
+# @app.route('/created_services', methods = ["POST", "GET"])
+# def created_services():
+# 	if request.method == 'GET':
+# 		return render_template('created_services.html')
+# 	if request.method == 'POST':
+# 		services = mongodb_query.get_services(session["username"])
+
+# 		return jsonify({"services":services})
+
+
+@app.route('/my_services')
+@login_required
+def my_services():
+	#services = mongodb_query.get_user_services(current_user.username)
+	logo_folder = '/content/service_pics/'
+	return render_template('my_services.html', services=services, logo_folder=logo_folder)
+
+
+
+@app.route('/test_create', methods = ["POST", "GET"])
+@login_required
+def test_create():
+	form = CreateServiceForm()
+	if request.method == 'POST':
+
+		flash('Service successfully created!', 'success')
+		return redirect(url_for('my_services'))
+	return render_template('service_create.html', title='Create new service', form=form)
+
+
+
+# #setting page allow to upload avatar
+# #			  redir to change password
+# #					to change name,surname,phone_num
+# @app.route('/settings', methods = ['GET'])
+# def settings():
+# 	if request.method == "GET":
+# 		userdata = mongodb_query.showUser_info(current_user.username)[0]
+# 		try:
+# 			avatar =  mongo.db.users_table.find_one({'username': current_user})['avatar']
+# 			return render_template("setting_page.html", login = userdata["username"], name = userdata["name"], surname = userdata["surname"], phone_num = userdata["phone_number"], image=avatar)
+# 		except KeyError:
+# 			return render_template("setting_page.html", login = userdata["username"], name = userdata["name"], surname = userdata["surname"], phone_num = userdata["phone_number"])
+
+
+
+# #allows to change name,surname
+# @app.route('/settings_change', methods = ['GET', 'POST'])
+# def settings_change_info():
+# 	if request.method == "GET":
+# 		if 'username' in session:
+# 			userdata = mongodb_query.showUser_info(session['username'])[0]
+# 			return render_template("settings_change.html", name = userdata["name"], surname = userdata["surname"], phone_num = userdata["phone_number"])
+# 		else:
+# 			return render_template('login_page.html')
+
+# 	if request.method == "POST":
+# 		if 'username' in session:
+# 			userdata = mongodb_query.showUser_info(session['username'])[0]
+# 			if mongodb_query.change_info(session['username'], request.form['name'], request.form['surname'], request.form['phone_number']):
+# 				flash("information successfuly changed")
+# 				return redirect(url_for("settings_change_info"))
+# 			else:
+# 				flash("something goes wrong, try again")
+# 				return redirect(url_for("settings_change_info"))
+
+
+
+# #uploading a picture from settings
+# @app.route('/up', methods = [ 'post'])
+# def upload_file():
+# 	if 'username' in session:
+# 		if request.method == 'POST':
+# 			# check if the post request has the file part
+# 			if 'file' not in request.files:
+# 				flash('No file part')
+# 				return redirect(url_for("mainpage"))
+# 			file = request.files['file']
+# 			# if user does not select file, browser also
+# 			# submit an empty part without filename
+# 			if file.filename == '':
+# 				flash('No selected file')
+# 				return redirect(url_for("mainpage"))
+# 			if file:
+# 				mongo.db.users_table.update_one({'username': session['username']}, {"$set":{'avatar':base64.b64encode(file.read()).decode()}})
+# 				flash("Image uploaded")
+# 			return redirect(url_for("mainpage"))
+# 	else:
+# 		return redirect ('/')
+
+
+
+
+
+
+
+
+
 
 #creating new service
 #first page for add information about specialization
@@ -422,27 +541,6 @@ def find_service(page = 1, filter = 'null'):
 """
 
 
-#uploading a picture from settings
-@app.route('/up', methods = [ 'post'])
-def upload_file():
-	if 'username' in session:
-		if request.method == 'POST':
-			# check if the post request has the file part
-			if 'file' not in request.files:
-				flash('No file part')
-				return redirect(url_for("mainpage"))
-			file = request.files['file']
-			# if user does not select file, browser also
-			# submit an empty part without filename
-			if file.filename == '':
-				flash('No selected file')
-				return redirect(url_for("mainpage"))
-			if file:
-				mongo.db.users_table.update_one({'username': session['username']}, {"$set":{'avatar':base64.b64encode(file.read()).decode()}})
-				flash("Image uploaded")
-			return redirect(url_for("mainpage"))
-	else:
-		return redirect ('/')
 
 #uses for return id from receiver
 @app.route('/chat_with', methods = ["POST", "GET"])
@@ -468,11 +566,6 @@ def messanger(id = 0):
 			return render_template('messanger.html', id = 0)
 
 
-@app.route('/who_am_i', methods = ["POST"])
-def who_am_i():
-	if 'username' in session:
-		if request.method == 'POST':
-			return jsonify({'nick': session['username']})
 
 @app.route('/get_messages', methods = ["POST"])
 def get_messages(id = 0):
@@ -537,21 +630,101 @@ def chatlist():
 
 
 
-@app.route('/check', methods = ["POST", "GET"])
-def check():
-	if 'username' in session:
-		mongodb_query.check_func_mongo()
-		jsonify(success=True)
 
-@app.route('/created_services', methods = ["POST", "GET"])
-def created_services():
-	if 'username' in session:
-		if request.method == 'GET':
-			return render_template('created_services.html')
-		if request.method == 'POST':
-			services = mongodb_query.get_services(session["username"])
 
-			return jsonify({"services":services})
 
-if __name__ == "__main__":
-	app.run(host='0.0.0.0', debug=True)
+
+
+
+
+
+
+
+
+# ==========================================================================================
+# All functions for testing will be placed BELOW
+
+# #it used just for testing to see each registered user
+# @app.route('/showregistered', methods = ['GET','POST'])
+# def showregistered():
+# 	if 'username' in session:
+# 		userdata = mongodb_query.showUser_info(session['username'])
+# 		try:
+# 			avatar =  mongo.db.users_table.find_one({'username':session['username']})['avatar']
+# 			return render_template("setting_page.html", login = userdata[0]["login"], name = userdata[0]["name"], surname = userdata[0]["surname"], phone_num = userdata[0]["phone_number"], image=avatar, users = mongodb_query.showAllusers_table())
+# 		except KeyError:
+# 			return render_template("setting_page.html", login = userdata[0]["username"], name = userdata[0]["name"], surname = userdata[0]["surname"], phone_num = userdata[0]["phone_number"], users = mongodb_query.showAllusers_table())
+# 	else:
+# 		return render_template('register_page.html')
+
+
+# @app.route('/who_am_i', methods = ["POST"])
+# def who_am_i():
+# 	if 'username' in session:
+# 		if request.method == 'POST':
+# 			return jsonify({'nick': session['username']})
+
+
+
+
+# @app.route('/check', methods = ["POST", "GET"])
+# def check():
+# 	if 'username' in session:
+# 		mongodb_query.check_func_mongo()
+# 		jsonify(success=True)
+
+
+
+
+# def mainpage():
+# 	if request.method == "GET":
+# 		if 'username' in session:
+# 			userdata = mongodb_query.showUser_info(session['username'])
+# 			name = userdata[0]["surname"]+" "+userdata[0]["name"]
+# 			try:
+# 				avatar =  mongo.db.users_table.find_one({'username':session['username']})['avatar']
+# 				return render_template('main_info.html', name = name, image=avatar, phone_num = userdata[0]["phone_number"])
+# 			except KeyError:
+# 				return render_template('main_info.html', name = name, phone_num = userdata[0]["phone_number"])
+# 		else:
+# 			return redirect ('/')
+
+
+
+
+
+
+# @app.route('/login', methods = ['GET','POST'])
+# def login():
+# 	if request.method == "POST":
+# 		if mongodb_query.user_exist(request.form['username'], request.form['password']):
+# 			session['username'] = request.form['username']
+# 			return redirect('mainpage')
+# 		else:
+# 			flash("Incorrect login or password!")
+# 			return render_template('login_page.html')
+# 	elif request.method == "GET":
+# 		if 'username' in session:
+# 			return redirect(url_for("mainpage"))
+# 	return render_template('login_page.html')
+
+
+
+
+
+# @app.route('/register', methods = ['GET','POST'])
+# def register():
+# 	if request.method == "GET":
+# 		if 'username' in session:
+# 			return redirect(url_for("mainpage"))
+# 		else:
+# 			return render_template('register_page.html')
+# 	elif request.method == "POST":
+# 		if mongodb_query.create_user(request.form['username'], request.form['password'], request.form['name'], request.form['surname'], request.form['phone_number']):
+# 			return redirect ('mainpage')
+# 		else:
+# 			flash("This username is already in use. Please try another one")
+# 			return render_template('register_page.html')
+
+
+

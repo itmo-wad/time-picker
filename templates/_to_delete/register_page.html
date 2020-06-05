@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	<style type="text/css">
+		body {
+
+			margin: 10%;
+		}
+		.flash {
+			font-size: 15px;
+			color: #AA0000;
+			text-align: center;
+			margin-bottom: 5px;
+		}
+
+
+
+		</style>
+
+
+	</head>
+
+
+
+
+	<body>
+
+
+
+	<div class="alert alert-secondary" role="alert" align="center">
+		Register new account!
+	</div>
+
+
+
+	<div>
+		{% for message in get_flashed_messages() %}
+			<p class='flash'>{{ message }} </p>
+		{% endfor %}
+	</div>
+
+  <form method = "POST" action="/register">
+    <input class="form-control" type="text" name="username" placeholder="username"  required>
+    <input class="form-control" type="password" name="password" placeholder="password" required>
+		<input class="form-control" type="text" name="name" placeholder="Enter your name"  required>
+		<input class="form-control" type="text" name="surname" placeholder="Enter your surname"  required>
+		<input class="form-control" type="text" name="phone_number" placeholder="Enter your contact phone"  required>
+    <button type="submit" class="btn btn-outline-secondary btn-block" class="btn">Create</button>
+  </form>
+
+
+
+	<button type="button" class="btn btn-outline-secondary btn-block" onclick="window.location.href='/anotherserviceregistration'">Sign up with another services.</button>
+	
+	<button type="button" class="btn btn-outline-secondary btn-block" onclick="window.location.href='/'">Return to login page.</button>
+</body >
+</html>

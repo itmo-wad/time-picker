@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+	<ul class="nav nav-tabs" id="createServiceTab" role="tablist">
+		<li class="nav-item">
+			<a class="nav-link active" id="specialization-tab" data-toggle="tab" href="#specialization" role="tab" aria-controls="specialization" aria-selected="true">Specialization</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="services-tab" data-toggle="tab" href="#services" role="tab" aria-controls="services" aria-selected="false">Services</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="map-tab" data-toggle="tab" href="#map" role="tab" aria-controls="map" aria-selected="false">Map</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="date_select-tab" data-toggle="tab" href="#date_select" role="tab" aria-controls="date_select" aria-selected="false">Select date</a>
+		</li>
+	</ul>
+	<form action="{{ url_for('test_create') }}" method="POST" enctype="multipart/form-data">
+		<div class="tab-content" id="createServiceTabContent">
+			<div class="tab-pane fade show active" id="specialization" role="tabpanel" aria-labelledby="specialization-tab">
+				<div class="wrapper-tab mt-4 mb-3">
+					<div class="jumbotron text-left">
+						<h1 class="display-4">Step 1/4:</h1>
+						<p class="lead">General information.</p>
+					</div>
+					<label>Your specialization</label>
+					<div class="input-group mb-3">
+						<input type="text" class="form-control" name="service_name" id='serviceName' placeholder="Hint: English tutor" >
+					</div>
+
+					<label>Describe yourself in a few words...</label>
+					<div class="input-group mb-3">
+						<textarea type="text" class="form-control" name="service_descr" id="additional_information" placeholder="Hint: I was a teacher at the University of Cambridge. Now i decided to stay home and can't live without teaching. I like kids..." ></textarea>
+					</div>
+
+					<label>Upload image for your service</label>
+					<div class="input-group mb-3">
+						<div class="custom-file btn-file">
+							<input type="file" class="custom-file-input" name="service_image" id="inputImage">
+							<label class="custom-file-label" for="inputImage">Select file...</label>
+						</div>
+					</div>
+					<div class="d-flex justify-content-center">
+						<img class="img-fluid" id="img-upload">
+					</div>
+
+					<button class="btn btn-lg btn-secondary btn-block btnNext mt-3 text-uppercase" type="button">NEXT STEP >></button>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="services" role="tabpanel" aria-labelledby="services-tab">
+				<div class="wrapper-tab mt-4 mb-3">
+					<div class="jumbotron text-left">
+						<h1 class="display-4">Step 2/4:</h1>
+						<p class="lead">Write information about all services, that you can provide.</p>
+					</div>
+					<div class="services" id="inputs">
+						<div class="input-group mb-2" id=1>
+							<div class="input-group-prepend">
+								<button class="input-group-text" type="button" onclick="add_delete(this)">Add new service</button>
+							</div>
+							<input type="text" class="form-control" placeholder="Service name (ex. haircut)">
+							<input type="text" class="form-control" placeholder="Service price (ex. 500₽)">
+						</div>
+					</div>
+					<div class="d-flex">
+						<button class="btn btn-lg btn-secondary btn-block btnPrevious mt-3 mr-1 text-uppercase" type="button"><< PREVIOUS STEP</button>
+						<button class="btn btn-lg btn-secondary btn-block btnNext mt-3 ml-1 text-uppercase" type="button">NEXT STEP >></button>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="map" role="tabpanel" aria-labelledby="map-tab">
+				<div class="wrapper-tab mt-4 mb-3">
+					<div class="jumbotron text-left">
+						<h1 class="display-4">Step 3/4:</h1>
+						<p class="lead">Set up address, where you'll provide service.</p>
+					</div>
+
+					<div class="fill_address">
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="">City</span>
+							</div>
+							<input class="form-control" type="text" name="city" placeholder="Hint: Saint-Petersburg" required>
+						</div>
+
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text">Street</span>
+							</div>
+							<input class="form-control" type="text" name="street" placeholder="Hint: Nevskiy prospect" required>
+						</div>
+
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text">Building number</span>
+							</div>
+							<input class="form-control" type="text" name="building_number" placeholder="Hint: 16" required>
+						</div>
+      					<button class="btn btn-secondary form-control mb-3" type="button">Check address on map</button>
+					</div>
+					
+
+<div class = "check">
+<button type="button" class="form-control" onclick="location.href = '/save_coordinate?id={{id}}&lt={{latitude}}&lg={{longitude}}'">Address is recognized excellent. Next step!</button>
+<button type="button" class="form-control" onclick="location.href = '/set_address?id={{id}}'">Map is not shown. Type address again.</button>
+<div>
+<div id="mapContainer" class="mapContainer"></div>
+</div>
+</div>
+
+					<div class="d-flex">
+						<button class="btn btn-lg btn-secondary btn-block btnPrevious mt-3 mr-1 text-uppercase" type="button"><< PREVIOUS STEP</button>
+						<button class="btn btn-lg btn-secondary btn-block btnNext mt-3 ml-1 text-uppercase" type="button">NEXT STEP >></button>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="date_select" role="tabpanel" aria-labelledby="date_select-tab">
+				<div class="wrapper-tab mt-4 mb-3">
+					<div class="jumbotron text-left">
+						<h1 class="display-4">Step 4/4:</h1>
+						<p class="lead">Select a date.</p>
+					</div>
+
+					<div class="d-flex">
+						<button class="btn btn-lg btn-secondary btn-block btnPrevious mt-3 mr-1 text-uppercase" type="button"><< PREVIOUS STEP</button>
+						<button class="btn btn-lg btn-secondary btn-block mt-3 text-uppercase" type="submit">FINISH</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+{% endblock %}
