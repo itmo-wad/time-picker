@@ -1,23 +1,35 @@
 """
-DB preparation:
-> db.createCollection("counters")
-> db.counters.insert({_id:"productid",sequence_value:0})
-> function getNextSequenceValue(sequenceName){
 
-   var sequenceDocument = db.counters.findAndModify({
-	  query:{_id: sequenceName },
-	  update: {$inc:{sequence_value:1}},
-	  new:true
-   });
+Structure of DB:
 
-   return sequenceDocument.sequence_value;
-}
+1. users_table - store info about users
+    - username : str
+    - password : str
+    - name : str
+    - surname : str
+    - phone_number : str
+    - avatar : str
 
+2. services - store info about created services
+    - _id: int  (to delete ?)
+    - username: str  (of creator)
+    - service_name: str
+    - addit_info: str
+    - service_logo: str (b64)
+    - services_names: list<str>  (store list of provided services)
+    - services_prices: dict<str:int>   (store reference to price of service)
+    - middle_price: int
+    - "lt": str
+    - "lg": str
+    - schedule: dict<str:list<dict<str:str>>>
+        ex:{"06.06.20": [{"10:00 - 11:00": "busy"}, {"11:00 - 12:00": "availble"}], "07.06.20": [{"10:00 - 11:00": "busy"}, {"11:00 - 12:00": "busy"}]}
 
+#Chat
+3. chats - store routing info
+    - chat_id: int
+    - participants: list<str>
+        ex: "participants": [ "admin", "user" ]
 
-I don't know why, but when DB is not in use some time, then function delete automaticly
-Need to create again
-function getNextSequenceValue(sequenceName){ var sequenceDocument = db.counters.findAndModify({ query:{_id: sequenceName }, update: {$inc:{sequence_value:1}}, new:true }); return sequenceDocument.sequence_value; }
 """
 import re
 import base64

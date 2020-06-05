@@ -147,6 +147,9 @@ function hideMap(){
           imgsrc.id = "map_image"
           imgsrc.src = 'data:image/png;base64, '+data["image"];
 
+					//!to save
+					console.log(data["coords"]);
+
           divimage.appendChild(imgsrc);
           showMap();
 

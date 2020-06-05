@@ -9,7 +9,7 @@ import secrets
 import mongodb_query
 from app import app, mongo
 from forms import RegistrationForm, LoginForm, UpdateAccountForm, CreateServiceForm
-#from datetime import datetime
+from datetime import datetime
 from flask_login import login_user, logout_user, current_user, login_required
 from flask import Flask, send_from_directory, request, flash, redirect, render_template, url_for, jsonify
 
@@ -581,83 +581,90 @@ def find_service(page = 1, filter = 'null'):
 
 
 
+
+#Chat starts
+
 #uses for return id from receiver
 @app.route('/chat_with', methods = ["POST", "GET"])
+@login_required
 def chat_with(receiver = None):
-	if 'username' in session:
+	if current_user.is_authenticated:
 		if request.method == 'GET':
 			receiver_nick = request.args.get('receiver')
-			chat_id = mongodb_query.get_chat_id(session['username'], receiver_nick)
+			chat_id = mongodb_query.get_chat_id(current_user.username, receiver_nick)
 			return redirect(url_for('messanger', id=chat_id))
-	if 'username' in session:
+
 		if request.method == 'POST':
 			return render_template('messanger.html', id = 0)
 
 #opens chat with selected id
 @app.route('/messanger', methods = ["POST", "GET"])
+@login_required
 def messanger(id = 0):
-	if 'username' in session:
+	if current_user.is_authenticated:
 		if request.method == 'GET':
 			chat_id = request.args.get('id')
 			return render_template('messanger.html',id = chat_id)
-	if 'username' in session:
+
+
 		if request.method == 'POST':
 			return render_template('messanger.html', id = 0)
 
 
 
 @app.route('/get_messages', methods = ["POST"])
+@login_required
 def get_messages(id = 0):
-	if 'username' in session:
+	if current_user.is_authenticated:
 		if request.method == 'POST':
 			chat_id = request.args.get('id')
-			print(chat_id)
 			messages = mongodb_query.get_messages(chat_id)
 			print(messages)
 			return jsonify({'data': messages})
 
 
 @app.route('/get_new_messages', methods = ["POST"])
+@login_required
 def get_new_messages(id = 0):
-	if 'username' in session:
+	if current_user.is_authenticated:
 		if request.method == 'POST':
 			date = request.data.decode("utf-8").split(',')
 			chat_id = request.args.get('id')
 			#db.messages.find({"chat_id":1, 'date': {'$lt': ISODate("2020-05-30T18:52:19.069Z"), '$gte': ISODate("2020-05-30T18:49:55.077Z")}},  { "_id": 0} )
 			request_time = datetime.strptime(date[0], '%Y-%m-%dT%H:%M:%S.%fZ')#datetime(2020, 5, 31, 9, 5, 9, 902785)#"Sun May 30 2020 18:49:55 GMT+0300"#
 			last_update_time = datetime.strptime(date[1], '%Y-%m-%dT%H:%M:%S.%fZ')#datetime(2020, 5, 31, 9, 4, 25, 243362)#"Sun May 30 2020 18:52:19 GMT+0300"#
-			new_messages = mongodb_query.get_new_messages(chat_id, session['username'], request_time, last_update_time )
+			new_messages = mongodb_query.get_new_messages(chat_id, current_user.username, request_time, last_update_time )
 
 			return jsonify({'new_msgs': new_messages})
 
 
 @app.route('/send_message', methods = ["POST"])
 def send_message(id = 0):
-	if 'username' in session:
+	if current_user.is_authenticated:
 		if request.method == 'POST':
 			chat_id = request.args.get('id')
 			message = request.data.decode("utf-8")
 			date = datetime.utcnow()
-			mongodb_query.send_message(chat_id, session['username'], message, date)
+			mongodb_query.send_message(chat_id, current_user.username, message, date)
 			return jsonify(success=True)
 
 
 
 @app.route('/chatlist', methods = ["POST"])
+@login_required
 def chatlist():
-	if 'username' in session:
+	if current_user.is_authenticated:
 		if request.method == 'POST':
 			#go for mongo
-			chats = mongodb_query.get_list_chats(session['username'])
+			chats = mongodb_query.get_list_chats(current_user.username)
 			list_of_dict = []
 			for chat in chats:#iterate through senders nicknames
 				dict_messages = {}
 				for nickname in chat["participants"]:
-					print (nickname)
-					if nickname != session['username']:
+					if nickname != current_user.username:
 						receiver = nickname
 						break
-				message = mongodb_query.get_last_message(session['username'], receiver)
+				message = mongodb_query.get_last_message(current_user.username, receiver)
 				if len(message) != 0:
 					print(message)
 					print(type(message))
@@ -668,7 +675,7 @@ def chatlist():
 			return jsonify({"chats":list_of_dict})
 
 
-
+#Chat ends
 
 
 
