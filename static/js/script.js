@@ -337,12 +337,12 @@ async function register_service() {
 	all_service_data["dates"] = dates;
 
 	//check filling
+	var show_info = document.getElementById("show_info");
 	if (missed_input(all_service_data["service_name"])||
 			missed_input(all_service_data["addit_info"])||
 			missed_input(all_service_data["services_prices"])||
 			missed_input(all_service_data["coords"])||
 			missed_input(all_service_data["dates"])) {
-		var show_info = document.getElementById("show_info");
 		show_info.style = "display:block;";
 		show_info.innerText = "You forget to fill some inputs";
 		return;
