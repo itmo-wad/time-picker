@@ -230,7 +230,16 @@ async function select_time(time) {
       headers: {
                 'Content-Type': 'application/json;charset=utf-8'
               },
+      redirect: 'follow',
       body: JSON.stringify(message)
     })
+    .then(response => {
+      // HTTP 301 response
+      // HOW CAN I FOLLOW THE HTTP REDIRECT RESPONSE?
+      console.log(response)
+      if (response.redirected) {
+          window.location.href = response.url;
+      }
+  });
 
   }
