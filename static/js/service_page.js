@@ -222,6 +222,7 @@ async function select_time(time) {
   let message = {};
   message["day"] = day.innerText;
   message["time"] =time;
+  message["service_id"] = window.location.href.split("service/")[1]
     url = 'http://' + document.domain + ':' + location.port+'/request_booking'
 
     let request_for_booking = await fetch(url,{

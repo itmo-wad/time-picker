@@ -473,6 +473,7 @@ def request_booking():
 		information = request.get_json()
 		day = information['day']
 		time = information['time']
+		service_id = information['service_id']
 		print(day)
 		print(time)
 		return render_template('service.html')
