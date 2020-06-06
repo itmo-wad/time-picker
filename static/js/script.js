@@ -216,6 +216,20 @@ function plus_zero(num) {
 
 function showslots() {
 
+
+	var range_time = document.getElementById("range_time").value;
+	var start_time = document.getElementById("start_time").value;
+	var end_time = document.getElementById("end_time").value;
+	//check filling
+	if (range_time == "" || start_time == "" || end_time == "") {
+		var show_info = document.getElementById("show_info");
+		show_info.style = "display:block;";
+		show_info.innerText = "You forget to fill hours inputs";
+		return;
+	} else {
+		show_info.style = "display:none;";
+	}
+
 	var divslot = document.getElementById("timeslots");
 	var call_button = document.getElementById("pick_slot_but");
 	if (call_button.textContent == "Clear slots") {
@@ -225,12 +239,11 @@ function showslots() {
   	}
 		return;
 	}
+	var save_slots = document.getElementById("save_work_hours");
+	save_slots.style = "display:block;";
+
 	call_button.textContent = "Clear slots";
-	//var date = $("#scheduleDate").datepicker({ dateFormat: 'dd,MM,yyyy' }).val();
-	//console.log(date);
-	var range_time = document.getElementById("range_time").value;
-	var start_time = document.getElementById("start_time").value.split(" ")[0];
-	var end_time = document.getElementById("end_time").value.split(" ")[0];
+
 
 	var start_hour = start_time.split(":")[0];
 	var start_minutes = start_time.split(":")[1];
@@ -290,7 +303,8 @@ function showslots() {
 //to send from 4/4
 var dates = {}
 function saveWorkHours(){
-	//todo check for filling all
+	var show_info = document.getElementById("show_info");
+
 	var work_hours = document.getElementById("timeslots").childNodes;
 	var list_work_hours = []
 	for (var i=0; i<work_hours.length; i++){
@@ -300,7 +314,9 @@ function saveWorkHours(){
 	var month = document.getElementsByClassName("picker-switch");
 	dates[day[0].innerText+" "+month[0].innerText] = list_work_hours
 
-	console.log(dates);
+
+	show_info.style = "display:block;";
+	show_info.innerText = "Saved for "+day[0].innerText+" "+month[0].innerText;
 }
 
 
@@ -314,11 +330,26 @@ async function register_service() {
 
 	all_service_data["service_name"] = document.getElementById("serviceName").value;
 	all_service_data["addit_info"] = document.getElementById("additional_information").value;
-	all_service_data["service_image"] = document.getElementById("img-upload").src.split("base64,/")[1];
+	all_service_data["service_image"] = document.getElementById("img-upload").src.split("base64, ")[1];
 	all_service_data["services_prices"] = get_services_prices();
 	all_service_data["coords"] = coords;
 	all_service_data["dates"] = dates;
-	console.log(all_service_data);
+
+	//check filling
+	if (missed_input(all_service_data["service_name"])||
+			missed_input(all_service_data["addit_info"])||
+			missed_input(all_service_data["services_prices"])||
+			missed_input(all_service_data["coords"])||
+			missed_input(all_service_data["dates"])) {
+		var show_info = document.getElementById("show_info");
+		show_info.style = "display:block;";
+		show_info.innerText = "You forget to fill some inputs";
+		return;
+	} else {
+		show_info.style = "display:none;";
+	}
+
+
 
 	url = 'http://' + document.domain + ':' + location.port+'/check_data';
   let request_register_service = await fetch(url,{
@@ -326,13 +357,23 @@ async function register_service() {
     headers: {
               'Content-Type': 'application/json;charset=utf-8'
             },
+		redirect: 'follow',
     body: JSON.stringify(all_service_data)
   })
-  .then((response) => {
-    return response.json();
-  })
-  .then((data) => {
-    if (data.message != '200OK') {
-      console.log(data);
-    }})
+	.then(response => {
+		// HTTP 301 response
+		// HOW CAN I FOLLOW THE HTTP REDIRECT RESPONSE?
+		console.log(response)
+		if (response.redirected) {
+				window.location.href = response.url;
+		}
+		})
 };
+
+
+//check for input
+function missed_input(arg) {
+	if (arg === undefined || arg == ""){
+		return true
+	}
+}
