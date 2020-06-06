@@ -128,7 +128,7 @@ def create_user(username, password, name, surname, phone_number):
 		mongo.db.users_table.insert({"username": username.lower(),
 									 "password": password,
 									 "name": name,
-									 "surname": urname,
+									 "surname": surname,
 									 "phone_number": phone_number
 									})
 		return True
