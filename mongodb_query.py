@@ -150,9 +150,23 @@ def get_all_services():
 
 
 #service creation
-def create_service(owner, service_name, additional_info, service_logo):
-	return 1
+def create_service(owner, service_id, service_name, master_name, addit_info, service_logo, services_prices, coords, dates):
+	mongo.db.services.insert({"owner": owner.lower(),
+							  "service_id": service_id,
+							  "service_name": service_name,
+							  "master_name": master_name,
+							  "addit_info": addit_info,
+							  "service_logo": service_logo,
+							  "services_prices": services_prices,
+							  "coords": coords,
+							  "dates": dates
+							  })
+	return True
 
+
+# Get service by id
+def get_service_by_id(service_id):
+	return list(mongo.db.services.find({"service_id": service_id}).limit(1))
 
 
 
