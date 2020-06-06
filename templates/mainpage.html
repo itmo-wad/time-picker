@@ -13,8 +13,8 @@
 						</div>
 						<div class="col-8">
 							<div class="card-body">
-								<h5 class="card-title">{{ service['service_name'] }}</h5>
-								<p class="card-text">{{ service['additional_info'] }}</p>
+								<h5 class="card-title"><a href="{{ url_for('service', service_id=service['service_id']) }}">{{ service['service_name'] }}</a></h5>
+								<p class="card-text">{{ service['addit_info'] }}</p>
 								<p class="card-text">Master: {{ service['master_name'] }}</p>
 								<p class="card-text"><small class="text-muted">Distance from you: 1.5 km.</small></p>
 								<p class="card-text"><small class="text-muted">Middle price: 1$</small></p>
