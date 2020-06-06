@@ -331,7 +331,8 @@ async function register_service() {
 
 	all_service_data["service_name"] = document.getElementById("serviceName").value;
 	all_service_data["addit_info"] = document.getElementById("additional_information").value;
-	all_service_data["service_image"] = document.getElementById("img-upload").src.split("base64, ")[1];
+	all_service_data["service_image"] = document.getElementById("img-upload").src.split("base64, ")[0];
+	console.log(all_service_data["service_image"])
 	all_service_data["services_prices"] = get_services_prices();
 	all_service_data["coords"] = coords;
 	all_service_data["dates"] = dates;
