@@ -227,6 +227,7 @@ function showslots() {
 		show_info.innerText = "You forget to fill hours inputs";
 		return;
 	} else {
+		var show_info = document.getElementById("show_info");
 		show_info.style = "display:none;";
 	}
 
