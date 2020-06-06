@@ -221,13 +221,13 @@ function showslots() {
 	var start_time = document.getElementById("start_time").value;
 	var end_time = document.getElementById("end_time").value;
 	//check filling
+	var show_info = document.getElementById("show_info");
 	if (range_time == "" || start_time == "" || end_time == "") {
-		var show_info = document.getElementById("show_info");
 		show_info.style = "display:block;";
 		show_info.innerText = "You forget to fill hours inputs";
 		return;
 	} else {
-		var show_info = document.getElementById("show_info");
+
 		show_info.style = "display:none;";
 	}
 
