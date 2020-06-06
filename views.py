@@ -463,3 +463,16 @@ def service(service_id):
 	service = mongodb_query.get_service_by_id(service_id)
 	return render_template('service.html', title=service[0]['service_name'],
 						   logo_folder=logo_folder, services=service)
+
+
+@app.route('/request_booking', methods = ["POST"])
+@login_required
+def request_booking():
+	if request.method == "POST":
+		#message = request.data.decode("utf-8")
+		information = request.get_json()
+		day = information['day']
+		time = information['time']
+		print(day)
+		print(time)
+		return render_template('service.html')
