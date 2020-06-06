@@ -235,7 +235,7 @@ def get_address_image():
 			print(image)
 
 
-			return jsonify({"image": base64.b64encode(image.content).decode(), "coords"=str(latitude)+','+str(longitude)})
+			return jsonify({"image": base64.b64encode(image.content).decode(), "coords":str(latitude)+','+str(longitude)})
 
 
 

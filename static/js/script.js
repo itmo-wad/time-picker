@@ -375,6 +375,6 @@ async function register_service() {
 //check for input
 function missed_input(arg) {
 	if (arg === undefined || arg == ""){
-		return true
+		return false
 	}
 }
